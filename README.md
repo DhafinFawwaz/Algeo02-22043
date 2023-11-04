@@ -17,15 +17,19 @@ Tugas besar ini berisi .
 
 <h2 id="how-to-run">📘 Cara Menggunakan Program</h2>
 Pastikan npm dan python sudah terinstall.
+Install node dari https://nodejs.org/en. Install python dari https://www.python.org/downloads/
 
 ### Install Dependencies
 Gunakan Command Promt, jalankan command berikut.
 ```bash
 pip install venv
-cd src\server\ocular
+cd src\server\
 python -m venv venv
-..\venv\Scripts\activate
+venv\Scripts\activate
+cd ocular
 pip install -r requirements.txt
+python manage.py migrate
+cd ../../../
 ```
 
 ### Run Backend
