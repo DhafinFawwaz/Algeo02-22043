@@ -18,9 +18,22 @@ Tugas besar ini berisi .
 <h2 id="how-to-run">📘 Cara Menggunakan Program</h2>
 Pastikan npm dan python sudah terinstall.
 
-### Run Program
+### Install Dependencies
+Gunakan Command Promt, jalankan command berikut.
+```bash
+pip install venv
+cd src\server\ocular
+..\venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+### Run Backend
 ```bash
 runserver
+```
+
+### Run Frontend
+```bash
 runclient
 ```
 
