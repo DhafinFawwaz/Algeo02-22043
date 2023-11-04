@@ -9,6 +9,7 @@ class Searcher:
     
     def getSearchResult(data: SearchRequest) -> List[SearchResult]:
         
+
         # cara akses image
         # letaknya semuanya di folder media
         # ini ngebuka dataset yang mau dibandingin
@@ -23,20 +24,14 @@ class Searcher:
 
         # print("Showing image:", data.image_request.name)
 
-        sr1 = SearchResult()
-        sr1.hash = "123"
-        sr1.image_url = "/media/No.jpg"
-        sr1.priority = 0
-
-        sr2 = SearchResult()
-        sr2.hash = "345"
-        sr2.image_url = "/media/cat demo.jpg"
-        sr2.priority = 1
+        result: list[SearchResult] = []
+        for i in range(50):
+            sr = SearchResult()
+            sr.hash = "123"
+            sr.image_url = "/media/cat demo.jpg"
+            sr.priority = 0
+            result.append(sr)
         
-        result = []
-        result.append(sr1)
-        result.append(sr2)
-
         return result
 
     
