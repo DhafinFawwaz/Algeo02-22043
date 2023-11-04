@@ -22,6 +22,9 @@ Install node dari https://nodejs.org/en. Install python dari https://www.python.
 ### Install Dependencies
 Gunakan Command Promt, jalankan command berikut.
 ```bash
+cd src\client
+npm install
+cd ../../
 pip install venv
 cd src\server\
 python -m venv venv
