@@ -1,4 +1,5 @@
 src/server/ocular/media/
+src/server/venv
 
 ### OSX ###
 .DS_Store
