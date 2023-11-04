@@ -23,6 +23,7 @@ Gunakan Command Promt, jalankan command berikut.
 ```bash
 pip install venv
 cd src\server\ocular
+python -m venv venv
 ..\venv\Scripts\activate
 pip install -r requirements.txt
 ```
