@@ -1,0 +1,267 @@
+'use client';
+import Image from 'next/image'
+import { ImageResponse as SearchResponse } from 'next/server';
+import { useState } from 'react';
+
+interface ImageImport{
+  src: string,
+  name: string,
+  size: number,
+  isPreview: boolean
+}
+interface SearchResponse{
+  image_url: string,
+  priority: number
+}
+interface ImageResult{
+  srcList: SearchResponse[],
+  isPreview: boolean,
+  maxImagePerPage: number,
+  page: number
+}
+
+export default function Home() {
+  const url = "http://127.0.0.1:8000"
+
+  const [imageImport, setImageImport] = useState<ImageImport>({
+    src: "",
+    name: "",
+    size: 0,
+    isPreview: false
+  });
+  const [imageResult, setImageResult] = useState<ImageResult>({
+    srcList: [],
+    isPreview: false,
+    maxImagePerPage: 6,
+    page: 0
+  });
+  function onImageImported(e: any){
+    if (e.target.files[0]) {
+      setImageImport({
+        src: URL.createObjectURL(e.target.files[0]), 
+        isPreview: true, 
+        name: e.target.files[0].name, 
+        size: e.target.files[0].size
+      });
+    }
+  }
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>){
+    e.preventDefault();
+    setImageResult({srcList: [], isPreview: false, maxImagePerPage: imageResult.maxImagePerPage, page: 0});
+
+    const formData = new FormData(e.currentTarget);
+
+    const requestOptions: RequestInit = {
+      method: "POST",
+      body: formData,
+    };
+
+    const res = await fetch(url+"/api/search", requestOptions)
+      .catch(e => console.log(e));
+    if(!res)return;
+
+    const data = await res.json();
+    if(!data)return;
+
+    
+
+    setImageResult({
+      srcList: data.map((res: SearchResponse) => {return {image_url: url+res.image_url, priority: res.priority}}), 
+      isPreview: true, 
+      maxImagePerPage: imageResult.maxImagePerPage, 
+      page: 0
+    });
+  }
+
+  function changePage(newPage: number){
+    if(newPage < 0 || newPage > imageResult.srcList.length/imageResult.maxImagePerPage) return;
+    setImageResult(
+      {
+        srcList: imageResult.srcList,
+        isPreview: imageResult.isPreview,
+        maxImagePerPage: imageResult.maxImagePerPage,
+        page: newPage
+      }
+    )
+  }
+
+  function getPaginationButton(newPage: number): JSX.Element{
+    if(newPage == imageResult.page){
+      return <div key={newPage} className='sm:w-10 sm:h-10 w-8 h-8 text-gray-900 bg-white border border-gray-300 font-medium rounded-lg text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 sm:pt-2.5 pt-1.5 text-center align-middle'>{newPage+1}</div>
+    }
+    return <button onClick={e => changePage(newPage)} key={newPage} className='sm:w-10 sm:h-10 w-8 h-8 text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 pt-0.5'>{newPage+1}</button>
+  }
+  function getPaginationDot(key: number): JSX.Element{
+    return <div key={key} className='w-5 text-center flex flex-col-reverse'>...</div>
+  }
+
+  function getPaginationButtonList(): JSX.Element[]{
+    let buttonList: JSX.Element[] = [];
+    if (imageResult.srcList.length/imageResult.maxImagePerPage <= 7){
+      for(let i = 0; i < imageResult.srcList.length/imageResult.maxImagePerPage; i++){
+        buttonList.push(getPaginationButton(i));
+      }
+      return buttonList;
+    }else{
+      // 1,  2  , 3  ,    4   ,   5  ,  6 ,  7
+      // 1, ... ,left, current, right, ..., last
+      // 1, 2 ,left, current, right, ..., last
+      // 1, ... ,left, current, right, 2nd last, last
+      // current, 2, 3, ..., last
+      // 1, current, 3, ..., last
+      // 1, 2, current, 3, ..., last
+      // first, ..., 3rd last, 2nd last, current
+      // first, ..., 3rd last, current, last
+      // first, ..., current, 2nd last, last
+      const minPage: number = 0;
+      const maxPage: number = Math.floor(imageResult.srcList.length/imageResult.maxImagePerPage);
+      buttonList.push(getPaginationButton(imageResult.page)); // current
+      if(imageResult.page-1 >= minPage) buttonList.unshift(getPaginationButton(imageResult.page-1)); // left
+      if(imageResult.page+1 <= maxPage) buttonList.push(getPaginationButton(imageResult.page+1)); // right
+
+      if(imageResult.page-3 >= minPage){
+        buttonList.unshift(getPaginationDot(-1));
+        buttonList.unshift(getPaginationButton(0)); // first
+      }else if(imageResult.page-2 >= minPage){
+        buttonList.unshift(getPaginationButton(0)); // first
+      }
+      if(imageResult.page+3 <= maxPage){
+        buttonList.push(getPaginationDot(-2));
+        buttonList.push(getPaginationButton(maxPage)); // last
+      }else if(imageResult.page+2 <= maxPage){
+        buttonList.push(getPaginationButton(maxPage)); // last
+      }
+      return buttonList;
+    }
+    
+      
+  }
+
+
+  return (
+    <main className="pt-8 pb-16 lg:pt-16 lg:pb-24 bg-white dark:bg-gray-900">
+      <div className='flex justify-between px-4 mx-auto max-w-screen-xl'>
+        <article className='mx-auto w-full max-w-2xl format format-sm sm:format-base lg:format-lg format-blue dark:format-invert'>
+          
+          {/* Form */}
+          
+          <form onSubmit={onSubmit}>
+            <div className='sm:grid sm:grid-cols-2 gap-4'>
+
+              <label htmlFor="dropzone-file" className={`flex flex-col items-center justify-center w-full h-56 rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:focus:bg-gray-100 ${imageImport.isPreview ? `` : `border-2 border-gray-300 border-dashed dark:border-gray-600`}`}>
+                
+              <input onChange={onImageImported} name='image' id="dropzone-file" type="file" className="hidden" formAction={""} accept="image/*"/>
+
+                {
+                imageImport.isPreview ?
+                <>
+                  <div className="group relative w-full h-full">
+                    <img src={imageImport.src} className="transition-transform duration-300 object-cover h-full w-full rounded-lg hover:bg-slate-600"/>
+                    <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-50 transition-opacity  rounded-lg group-hover:visible invisible flex flex-col items-center justify-center pt-5 pb-6">
+                      <svg className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                      </svg>
+                      <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">PNG, JPG or JPEG</p>
+                    </div>
+                  </div>
+
+                </>
+                :
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <svg className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                  </svg>
+                  <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">PNG, JPG or JPEG</p>
+                </div>
+                }
+
+
+              </label>
+
+
+              <div className='flex flex-col justify-between'>
+                
+                {!imageImport.isPreview ? <div></div> :
+                <div>
+                  <div>
+                    Image: {imageImport.name}
+                  </div>
+                  <div>
+                    Size: {imageImport.size/1000} KB
+                  </div>
+                </div>
+                }
+
+                <div className="text-end">
+                  <div className='flex flex-row-reverse gap-2'>
+                    <input defaultChecked id="default-radio-1" type="radio" value="" name="default-radio" className="translate-y-0.5 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600"/>
+                    <label htmlFor="default-radio-1" className="block text-sm font-medium text-gray-900 dark:text-gray-300 mb-2">By Texture</label>
+                  </div>
+                  <div className='flex flex-row-reverse gap-2'>
+                    <input id="default-radio-2" type="radio" value="" name="default-radio" className="translate-y-0.5 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600"/>
+                    <label htmlFor="default-radio-2" className="block text-sm font-medium text-gray-900 dark:text-gray-300 mb-2">By Color</label>
+                  </div>
+                    <input type="submit" value={"Search Image"} className='w-full cursor-pointer text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700'></input>
+                </div>
+
+
+              </div>
+            </div>
+
+            
+          </form>
+            
+          {/* Search Result */}
+            
+            {
+              !imageResult.isPreview ?
+              <>
+              </>
+              :
+              <>
+                <hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"></hr>
+                <div className='bg-slate-800 rounded-lg grid grid-cols-2 sm:grid-cols-3 gap-3 p-3'>
+                {
+                  imageResult.srcList.map((image: SearchResponse, i: number) => {
+                    if(i >= imageResult.page*imageResult.maxImagePerPage
+                      && i < (imageResult.page+1)*imageResult.maxImagePerPage
+                      ){
+                        return  <div key={i} className='w-full h-32 bg-slate-700 rounded-lg'>
+                              <img className='object-cover w-full h-full z-50 rounded-lg' src={image.image_url}/>
+                            </div>  
+                      }
+                    return;
+                  }
+                    
+                  )
+                }
+                </div>
+                
+                <div className='flex sm:gap-3 gap-2 justify-center mt-3'>
+                  {/* left arrow */}
+                  <button onClick={e => {changePage(imageResult.page-1); }} className='sm:w-10 sm:h-10 w-8 h-8 text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 grid place-items-center'>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g transform="rotate(-90 12 12)"><g id="feArrowUp0" fill="none" fillRule="evenodd" stroke="none" strokeWidth="1"><g id="feArrowUp1" fill="currentColor"><path id="feArrowUp2" d="m4 15l8-8l8 8l-2 2l-6-6l-6 6z"/></g></g></g></svg>
+                  </button>
+                  {
+                    getPaginationButtonList()
+                  }
+                  {/* right arrow */}
+                  <button onClick={e => changePage(imageResult.page+1)} className='sm:w-10 sm:h-10 w-8 h-8 text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 grid place-items-center'>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g transform="rotate(90 12 12)"><g id="feArrowUp0" fill="none" fillRule="evenodd" stroke="none" strokeWidth="1"><g id="feArrowUp1" fill="currentColor"><path id="feArrowUp2" d="m4 15l8-8l8 8l-2 2l-6-6l-6 6z"/></g></g></g></svg>
+                  </button>
+                </div>
+      
+              </>
+            }
+          <hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"></hr>
+
+          <button type="submit" className='w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700'>Upload Dataset</button>
+
+        </article>
+      </div>
+    </main>
+  )
+}
