@@ -37,7 +37,7 @@ class Searcher:
         for i in range(15):
             sr = SearchResult()
             sr.hash = data.hash
-            sr.image_url = "/media/cat demo.jpg"
+            sr.image_url = "/media/download.jpeg"
             result.append(sr)
         
         return (result, is_hash_exist)
