@@ -25,7 +25,7 @@ Gunakan Command Promt, jalankan command berikut.
 cd src\client
 npm install
 cd ../../
-pip install venv
+pip install virtualenv
 cd src\server\
 python -m venv venv
 venv\Scripts\activate

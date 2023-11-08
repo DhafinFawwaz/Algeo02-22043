@@ -10,8 +10,7 @@ interface ImageImport{
   isPreview: boolean
 }
 interface SearchResponse{
-  image_url: string,
-  priority: number
+  image_url: string
 }
 interface ImageResult{
   srcList: SearchResponse[],
@@ -51,7 +50,6 @@ export default function Home() {
     setImageResult({srcList: [], isPreview: false, maxImagePerPage: imageResult.maxImagePerPage, page: 0});
 
     const formData = new FormData(e.currentTarget);
-
     const requestOptions: RequestInit = {
       method: "POST",
       body: formData,
@@ -60,14 +58,17 @@ export default function Home() {
     const res = await fetch(url+"/api/search", requestOptions)
       .catch(e => console.log(e));
     if(!res)return;
+    if(res.status === 400){
+      console.log("bad request");
+      return; // bad request
+    }
 
     const data = await res.json();
     if(!data)return;
 
-    
 
     setImageResult({
-      srcList: data.map((res: SearchResponse) => {return {image_url: url+res.image_url, priority: res.priority}}), 
+      srcList: data.map((res: SearchResponse) => {return {image_url: url+res.image_url}}), 
       isPreview: true, 
       maxImagePerPage: imageResult.maxImagePerPage, 
       page: 0
@@ -197,11 +198,11 @@ export default function Home() {
 
                 <div className="text-end">
                   <div className='flex flex-row-reverse gap-2'>
-                    <input defaultChecked id="default-radio-1" type="radio" value="" name="default-radio" className="translate-y-0.5 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600"/>
+                    <input defaultChecked id="default-radio-1" type="radio" value={0} name="search_type" className="translate-y-0.5 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600"/>
                     <label htmlFor="default-radio-1" className="block text-sm font-medium text-gray-900 dark:text-gray-300 mb-2">By Texture</label>
                   </div>
                   <div className='flex flex-row-reverse gap-2'>
-                    <input id="default-radio-2" type="radio" value="" name="default-radio" className="translate-y-0.5 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600"/>
+                    <input id="default-radio-2" type="radio" value={1} name="search_type" className="translate-y-0.5 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600"/>
                     <label htmlFor="default-radio-2" className="block text-sm font-medium text-gray-900 dark:text-gray-300 mb-2">By Color</label>
                   </div>
                     <input type="submit" value={"Search Image"} className='w-full cursor-pointer text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700'></input>

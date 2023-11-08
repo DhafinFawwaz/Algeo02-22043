@@ -4,9 +4,9 @@ from .models import SearchResult
 class SearchRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = SearchRequest
-        fields = ["hash", "image_request"]
+        fields = ["hash", "image_request","search_type"]
 
 class SearchResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = SearchResult
-        fields = ["hash", "image_url", "priority"]
+        fields = ["hash", "image_url"]
