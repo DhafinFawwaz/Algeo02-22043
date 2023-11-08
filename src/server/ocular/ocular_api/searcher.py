@@ -14,6 +14,12 @@ class Searcher:
         return sha256_hash
     
     def getSearchResult(data: SearchRequest) -> Tuple[List[SearchResult],bool]:
+        
+        
+        
+        return ([],True)
+
+        
         # Kalau data.hash ada di database, ambil semua image yang punya hash yang sama, returnkan
         is_hash_exist: bool = SearchRequest.objects.filter(hash=data.hash).exists()
         if is_hash_exist:
