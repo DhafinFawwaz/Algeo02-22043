@@ -13,8 +13,6 @@ from .serializers import SearchRequestSerializer, SearchResultSerializer
 from .searcher import Searcher
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
-# from multiprocessing import Pool
-from ctypes import cdll
 
 class SearchRequestApiView(APIView):
     # add permission to check if user is authenticated
@@ -79,10 +77,6 @@ class SearchResultApiView(APIView):
 
     # untuk debug
     def get(self, request, *args, **kwargs):
-        cprog = cdll.LoadLibrary('ocular_api/util/test.so')
-        a = cprog.multi5(7)
-        print(a)
-
         hash = request.query_params.get('hash')
         if(not hash):
             searchRes = SearchResult.objects.all()
