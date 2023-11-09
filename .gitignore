@@ -32,6 +32,8 @@ __pycache__/
 
 # C extensions
 *.so
+!searchByTexture.so
+!searchByColor.so
 
 # Distribution / packaging
 .Python

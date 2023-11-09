@@ -4,6 +4,9 @@ from PIL import Image
 from typing import List, Tuple
 import hashlib
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.conf import settings
+import numpy as np
+from pathlib import Path
 
 class Searcher:
     def generateHash(image_file: InMemoryUploadedFile, search_type: str) -> str:
@@ -15,8 +18,16 @@ class Searcher:
     
     def getSearchResult(data: SearchRequest) -> Tuple[List[SearchResult],bool]:
         
+        print("Test==================")
+
+        images_path = Path(settings.MEDIA_ROOT).glob('*.*')
+        for image_path in images_path:
+            img = Image.open(image_path)
+            im_matrix = np.array(img)
+            print(im_matrix[0][0])
+            print(im_matrix[0][0][2]    )
         
-        
+
         return ([],True)
 
         
