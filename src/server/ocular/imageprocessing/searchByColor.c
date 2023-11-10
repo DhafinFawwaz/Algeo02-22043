@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #define HSV_HIST_SIZE 72
 
@@ -162,4 +164,16 @@ void HSVtoHistArray(int *Hist, int *img_matrix_x, int *img_matrix_y, int ***img_
             HSVtoHistElmt(Hist, img_matrix[i][j][0], img_matrix[i][j][1], img_matrix[i][j][2]);
         }
     }
+}
+
+float* getColorHistogram(int*** matrix, int row, int col) {
+    printf("getColorHistogram\n");
+    float* colorHistogram;
+    colorHistogram = (float*) malloc(sizeof(float) * HSV_HIST_SIZE);
+    colorHistogram[3] = 100;
+    return colorHistogram;
+}
+
+void free_ptr(float* arr) {
+    free(arr);
 }

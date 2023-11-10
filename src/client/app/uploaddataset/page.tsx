@@ -41,8 +41,9 @@ export default function UploadDataset() {
     }
 
     const formData = new FormData(e.currentTarget);
+    formData.delete("images");
     imageImportList.imageImport.forEach((imageImport: ImageImport, index: number) => {
-      formData.append(`images[${index}]`, imageImport.data!);
+      formData.append(`images`, imageImport.data!);
     });
 
     const requestOptions: RequestInit = {
@@ -62,8 +63,12 @@ export default function UploadDataset() {
       return; // bad request
     }
 
-    const data = await res.json();
-    if(!data)return;
+    try{
+      const data = await res.json();
+      if(!data)return;
+    }catch(e){
+      console.log(e);
+    }
 
   }
 
@@ -124,7 +129,7 @@ export default function UploadDataset() {
                 });
               }}
               >
-              <input multiple={true} onChange={onImageImported} name='image' id="dropzone-file" type="file" className="hidden" formAction={""} accept="image/*"/>
+              <input multiple={true} onChange={onImageImported} name='images' id="dropzone-file" type="file" className="hidden" formAction={""} accept="image/*"/>
 
                 
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -139,7 +144,7 @@ export default function UploadDataset() {
               </label>
 
 
-              <div className='flex flex-col justify-between'>
+              <div className='flex mt-4 flex-col justify-between'>
                 
                 {!imageImportList.isPreview ? <div></div> :
                 <div>

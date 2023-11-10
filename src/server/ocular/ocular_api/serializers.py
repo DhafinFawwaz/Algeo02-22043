@@ -16,4 +16,4 @@ class DataSetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DataSet
-        fields = ["image_url", "texture_components", "color_histogram"]
+        fields = ["image_request", "texture_components", "color_histogram"]

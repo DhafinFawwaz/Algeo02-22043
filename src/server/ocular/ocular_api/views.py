@@ -13,6 +13,9 @@ from .serializers import SearchRequestSerializer, SearchResultSerializer, DataSe
 from .searcher import Searcher
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
+from multiprocessing import Pool
+from time import time
+from .uploader import Uploader
 
 class SearchRequestApiView(APIView):
     # add permission to check if user is authenticated
@@ -91,31 +94,22 @@ class UploadDatasetApiView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, *args, **kwargs):
-        
-        data = {
-            'image_url': "",
-            'texture_components': [5.3452,2.1243,1.123],
-            'color_histogram': [5.00,2.15,1.123,6.111,2.543,3.12,10.523],
-        }
-        dataset_serializer = DataSetSerializer(data=data)
+        all_data = DataSet.objects.all()
+        list_dataset_serializer = DataSetSerializer(all_data,many=True)
+        return Response(list_dataset_serializer.data, status=status.HTTP_201_CREATED)
+    
 
-        if not dataset_serializer.is_valid():
-            return Response(dataset_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            all_data = DataSet.objects.all()
-            list_dataset_serializer = DataSetSerializer(all_data,many=True)
-            return Response(list_dataset_serializer.data, status=status.HTTP_201_CREATED)
-        
+    
     def post(self, request, *args, **kwargs):
         
-        current_image = request.data.get('images[0]')
-        images = [current_image]
-        i = 1
-        while current_image:
-            current_image = request.data.get('images['+str(i)+']')
-            images.append(current_image)
-            i += 1
-        print(images)
+        image_list = request.data.getlist('images')
+        if image_list[0] == '': # can happen because of the way FormData works
+            image_list.pop(0)
+
+        start = time()
+        Uploader.saveImages(image_list)
+        print("Saving images took", time()-start, "seconds")
+
         return Response("", status=status.HTTP_201_CREATED)
     
         # delete all SearchResult

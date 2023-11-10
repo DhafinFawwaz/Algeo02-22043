@@ -17,7 +17,7 @@ class SearchResult(models.Model):
     
     
 class DataSet(models.Model):
-    image_url = models.TextField(default="", blank=True) # yg bisa diakses secara publik url_backend+image_url
+    image_request = models.ImageField(upload_to="dataset") # literally image nya
     texture_components = models.JSONField(default=list) # texture components: [contrast,dissimilarity,homogeneity,ASM,entropy,energy]
     color_histogram = models.JSONField(default=list) # color histogram: list[72]
 

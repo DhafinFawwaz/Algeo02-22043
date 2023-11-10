@@ -8,6 +8,7 @@ from django.conf import settings
 import numpy as np
 from pathlib import Path
 
+
 class Searcher:
     def generateHash(image_file: InMemoryUploadedFile, search_type: str) -> str:
         image_content = image_file.read()
@@ -26,7 +27,7 @@ class Searcher:
             img = Image.open(image_path)
             im_matrix = np.array(img)
             print(im_matrix[0][0])
-            print(im_matrix[0][0][2]    )
+            print(im_matrix[0][0][2])
         
 
         return ([],True)
