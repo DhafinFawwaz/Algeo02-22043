@@ -19,6 +19,7 @@ class Searcher:
     def getSearchResult(data: SearchRequest) -> Tuple[List[SearchResult],bool]:
         
         print("Test==================")
+        return ([],True)
 
         images_path = Path(settings.MEDIA_ROOT).glob('*.*')
         for image_path in images_path:

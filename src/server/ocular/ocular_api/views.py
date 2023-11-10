@@ -8,8 +8,8 @@ from PIL import Image, ImageDraw
 from typing import List, Tuple
 from django.conf import settings
 
-from .models import SearchRequest, SearchResult
-from .serializers import SearchRequestSerializer, SearchResultSerializer
+from .models import SearchRequest, SearchResult, DataSet
+from .serializers import SearchRequestSerializer, SearchResultSerializer, DataSetSerializer
 from .searcher import Searcher
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
@@ -90,6 +90,33 @@ class SearchResultApiView(APIView):
 class UploadDatasetApiView(APIView):
     permission_classes = [permissions.AllowAny]
 
+    def get(self, request, *args, **kwargs):
+        
+        data = {
+            'image_url': "",
+            'texture_components': [5.3452,2.1243,1.123],
+            'color_histogram': [5.00,2.15,1.123,6.111,2.543,3.12,10.523],
+        }
+        dataset_serializer = DataSetSerializer(data=data)
+
+        if not dataset_serializer.is_valid():
+            return Response(dataset_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            all_data = DataSet.objects.all()
+            list_dataset_serializer = DataSetSerializer(all_data,many=True)
+            return Response(list_dataset_serializer.data, status=status.HTTP_201_CREATED)
+        
     def post(self, request, *args, **kwargs):
-        image_request_data = request.data.get('image')
-        print(image_request_data)
+        
+        current_image = request.data.get('images[0]')
+        images = [current_image]
+        i = 1
+        while current_image:
+            current_image = request.data.get('images['+str(i)+']')
+            images.append(current_image)
+            i += 1
+        print(images)
+        return Response("", status=status.HTTP_201_CREATED)
+    
+        # delete all SearchResult
+

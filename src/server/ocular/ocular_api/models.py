@@ -14,3 +14,12 @@ class SearchResult(models.Model):
 
     def __str__(self):
         return self.task
+    
+    
+class DataSet(models.Model):
+    image_url = models.TextField(default="", blank=True) # yg bisa diakses secara publik url_backend+image_url
+    texture_components = models.JSONField(default=list) # texture components: [contrast,dissimilarity,homogeneity,ASM,entropy,energy]
+    color_histogram = models.JSONField(default=list) # color histogram: list[72]
+
+    def __str__(self):
+        return self.task
