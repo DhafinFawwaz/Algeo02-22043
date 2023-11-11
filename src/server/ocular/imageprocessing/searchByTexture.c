@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <stdio.h>
 #include <math.h>
 #define GLCM_SIZE 255
 #define COSINE_SIMILARITY_VECTOR_SIZE 6
@@ -52,4 +54,20 @@ int generateSomething(){
     similarity = cosineSimilarity(A,B,COSINE_SIMILARITY_VECTOR_SIZE);
 
     return 0;
+}
+
+float* getTextureComponents(int*** matrix, int row, int col) {
+    float* textureComponents;
+    textureComponents = (float*) malloc(sizeof(float) * COSINE_SIMILARITY_VECTOR_SIZE);
+    textureComponents[0] = 100;
+    textureComponents[1] = 100;
+    textureComponents[2] = 100;
+    textureComponents[3] = 100;
+    textureComponents[4] = 100;
+    textureComponents[5] = 100;
+    return textureComponents;
+}
+
+void free_ptr(float* arr) {
+    free(arr);
 }

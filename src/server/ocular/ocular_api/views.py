@@ -8,11 +8,14 @@ from PIL import Image, ImageDraw
 from typing import List, Tuple
 from django.conf import settings
 
-from .models import SearchRequest, SearchResult
-from .serializers import SearchRequestSerializer, SearchResultSerializer
+from .models import SearchRequest, SearchResult, DataSet
+from .serializers import SearchRequestSerializer, SearchResultSerializer, DataSetSerializer
 from .searcher import Searcher
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
+from multiprocessing import Pool
+from time import time
+from .uploader import Uploader
 
 class SearchRequestApiView(APIView):
     # add permission to check if user is authenticated
@@ -90,6 +93,28 @@ class SearchResultApiView(APIView):
 class UploadDatasetApiView(APIView):
     permission_classes = [permissions.AllowAny]
 
+    def get(self, request, *args, **kwargs):
+        all_data = DataSet.objects.all()
+        if request.query_params.get('limit'):
+            limit = int(request.query_params.get('limit'))
+            all_data = all_data[:limit]
+        
+        list_dataset_serializer = DataSetSerializer(all_data,many=True)
+        return Response(list_dataset_serializer.data, status=status.HTTP_201_CREATED)
+    
+
+    
     def post(self, request, *args, **kwargs):
-        image_request_data = request.data.get('image')
-        print(image_request_data)
+        
+        image_list = request.data.getlist('images')
+        if image_list[0] == '': # can happen because of the way FormData works
+            image_list.pop(0)
+
+        start = time()
+        Uploader.saveImages(image_list)
+        print("Saving images took", time()-start, "seconds")
+
+        return Response("", status=status.HTTP_201_CREATED)
+    
+        # delete all SearchResult
+

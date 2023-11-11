@@ -1,20 +1,21 @@
 'use client';
 import Image from 'next/image'
-import { ImageResponse as SearchResponse } from 'next/server';
 import { useState } from 'react';
+import { LoadingSkeleton } from '../component/loadingskeleton';
 
-interface ImageImport{
+export interface ImageImport{
   src: string,
   name: string,
   size: number,
-  isPreview: boolean
+  isPreview: boolean,
+  data: File | undefined
 }
-interface SearchResponse{
+export interface SearchResponse{
   image_url: string
 }
-interface ImageResult{
+export interface ImageResult{
   srcList: SearchResponse[],
-  isPreview: boolean,
+  state: number, // 0: none 1: loading 2: ispreview
   maxImagePerPage: number,
   page: number
 }
@@ -26,37 +27,53 @@ export default function Home() {
     src: "",
     name: "",
     size: 0,
-    isPreview: false
+    isPreview: false,
+    data: undefined
   });
   const [imageResult, setImageResult] = useState<ImageResult>({
     srcList: [],
-    isPreview: false,
+    state: 0,
     maxImagePerPage: 6,
     page: 0
   });
+  const [isHighlightImport, setIsHighlightImport] = useState<boolean>(false);
+
   function onImageImported(e: any){
     if (e.target.files[0]) {
       setImageImport({
         src: URL.createObjectURL(e.target.files[0]), 
         isPreview: true, 
         name: e.target.files[0].name, 
-        size: e.target.files[0].size
+        size: e.target.files[0].size,
+        data: e.target.files[0]
       });
     }
   }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>){
     e.preventDefault();
-    setImageResult({srcList: [], isPreview: false, maxImagePerPage: imageResult.maxImagePerPage, page: 0});
+
+    if(!imageImport.isPreview){
+      console.log("no image");
+      return;
+    }
+
+    setImageResult({srcList: [], state: 1, maxImagePerPage: imageResult.maxImagePerPage, page: 0});
 
     const formData = new FormData(e.currentTarget);
+    formData.set("image", imageImport.data!);
+
     const requestOptions: RequestInit = {
       method: "POST",
       body: formData,
     };
 
+
     const res = await fetch(url+"/api/search", requestOptions)
       .catch(e => console.log(e));
+    // wait 1 second
+    await new Promise(r => setTimeout(r, 3000));
+
     if(!res)return;
     if(res.status === 400){
       console.log("bad request");
@@ -69,7 +86,7 @@ export default function Home() {
 
     setImageResult({
       srcList: data.map((res: SearchResponse) => {return {image_url: url+res.image_url}}), 
-      isPreview: true, 
+      state: 2, 
       maxImagePerPage: imageResult.maxImagePerPage, 
       page: 0
     });
@@ -80,7 +97,7 @@ export default function Home() {
     setImageResult(
       {
         srcList: imageResult.srcList,
-        isPreview: imageResult.isPreview,
+        state: imageResult.state,
         maxImagePerPage: imageResult.maxImagePerPage,
         page: newPage
       }
@@ -141,25 +158,73 @@ export default function Home() {
 
 
   return (
-    <main className="pt-8 pb-16 lg:pt-16 lg:pb-24 bg-white dark:bg-gray-900">
+    <main className="pb-16 lg:pt-16 lg:pb-24 bg-white dark:bg-gray-900">
       <div className='flex justify-between px-4 mx-auto max-w-screen-xl'>
         <article className='mx-auto w-full max-w-2xl format format-sm sm:format-base lg:format-lg format-blue dark:format-invert'>
           
+          <h1 className='font-bold text-3xl text-center mb-8'>Reverse Image Search</h1>
           {/* Form */}
           
           <form onSubmit={onSubmit}>
             <div className='sm:grid sm:grid-cols-2 gap-4'>
+              <label htmlFor="dropzone-file" className={`
+              
+              flex flex-col items-center justify-center w-full h-56 rounded-lg cursor-pointer  dark:focus:bg-gray-100 
+              hover:bg-gray-100 hover:dark:bg-gray-600
 
-              <label htmlFor="dropzone-file" className={`flex flex-col items-center justify-center w-full h-56 rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:focus:bg-gray-100 ${imageImport.isPreview ? `` : `border-2 border-gray-300 border-dashed dark:border-gray-600`}`}>
-                
+              ${!isHighlightImport ? `bg-gray-50 dark:bg-gray-700` : `bg-gray-100 dark:bg-gray-600`}
+              
+              ${imageImport.isPreview ? `` : `border-2 border-gray-300 border-dashed dark:border-gray-600`}
+              
+              `}
+              onDragEnter={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsHighlightImport(true);
+              }}
+              onDragOver={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsHighlightImport(true);
+              }}
+              onDragLeave={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsHighlightImport(false);
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsHighlightImport(false);
+
+                setImageImport({
+                  src: URL.createObjectURL(e.dataTransfer.files[0]), 
+                  isPreview: true, 
+                  name: e.dataTransfer.files[0].name, 
+                  size: e.dataTransfer.files[0].size,
+                  data: e.dataTransfer.files[0],
+                });
+              }}
+              >
               <input onChange={onImageImported} name='image' id="dropzone-file" type="file" className="hidden" formAction={""} accept="image/*"/>
 
                 {
                 imageImport.isPreview ?
                 <>
                   <div className="group relative w-full h-full">
-                    <img src={imageImport.src} className="transition-transform duration-300 object-cover h-full w-full rounded-lg hover:bg-slate-600"/>
-                    <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-50 transition-opacity  rounded-lg group-hover:visible invisible flex flex-col items-center justify-center pt-5 pb-6">
+                    <img src={imageImport.src} className={`
+                    transition-transform duration-300 object-cover h-full w-full rounded-lg hover:bg-slate-600                   
+                    `}/>
+
+                    {/* hightlight */}
+                    <div className={`
+
+                    absolute inset-0 bg-black group-hover:opacity-50 transition-opacity  rounded-lg group-hover:visible flex flex-col items-center justify-center pt-5 pb-6
+
+                    ${!isHighlightImport ? `opacity-0 invisible` : `opacity-50 visible`}
+
+                    
+                    `}>
                       <svg className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
                           <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
                       </svg>
@@ -218,9 +283,11 @@ export default function Home() {
           {/* Search Result */}
             
             {
-              !imageResult.isPreview ?
-              <>
-              </>
+              imageResult.state === 0 ?
+              <></>
+              :
+              imageResult.state === 1 ?
+              <LoadingSkeleton maxImagePerPage={6}></LoadingSkeleton>
               :
               <>
                 <hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"></hr>
@@ -259,8 +326,7 @@ export default function Home() {
             }
           <hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"></hr>
 
-          <button type="submit" className='w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700'>Upload Dataset</button>
-
+         
         </article>
       </div>
     </main>
