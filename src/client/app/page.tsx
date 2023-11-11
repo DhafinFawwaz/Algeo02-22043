@@ -163,7 +163,7 @@ export default function Home() {
 
 
   return (
-    <main className="pb-16 lg:pt-16 lg:pb-24 bg-white dark:bg-gray-900">
+    <main className="pb-16 lg:pt-16 lg:pb-24">
       <div className='flex justify-between px-4 mx-auto max-w-screen-xl'>
         <article className='mx-auto w-full max-w-2xl format format-sm sm:format-base lg:format-lg format-blue dark:format-invert'>
           
@@ -310,9 +310,12 @@ export default function Home() {
                     if(i >= imageResult.page*imageResult.maxImagePerPage
                       && i < (imageResult.page+1)*imageResult.maxImagePerPage
                       ){
-                        return  <div key={i} className='w-full h-32 bg-slate-700 rounded-lg'>
-                              <img className='object-cover w-full h-full z-50 rounded-lg' src={image.image_url}/>
-                            </div>  
+                        return  <a href={image.image_url} target='_blank' key={i} className='w-full h-36 bg-slate-700 rounded-lg relative cursor-pointer group'>
+                                  <img className='object-cover w-full h-full rounded-lg absolute' src={image.image_url}/>
+                                  <div className='opacity-0 group-hover:opacity-50 duration-150 bg-black h-full w-full z-30 rounded-lg absolute flex flex-col-reverse'>
+                                    <div className='truncate ... z-50 px-2 pb-0.5'>{image.image_url}</div>
+                                  </div>
+                                </a>  
                       }
                     return;
                   }
