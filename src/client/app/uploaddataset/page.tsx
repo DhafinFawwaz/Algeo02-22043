@@ -17,6 +17,8 @@ export default function UploadDataset() {
   });
   const [isHighlightImport, setIsHighlightImport] = useState<boolean>(false);
 
+  const [uploadState, setUploadState] = useState<number>(0);
+
   function onImageImported(e: any){
     setImageImportList({
       isPreview: true,
@@ -51,10 +53,11 @@ export default function UploadDataset() {
       body: formData,
     };
 
-
+    setUploadState(1);
     const res = await fetch(url+"/api/upload/dataset", requestOptions)
       .catch(e => console.log(e));
     // wait 1 second
+    setUploadState(2);
 
     if(!res)return;
     if(res.status === 400){
@@ -128,7 +131,7 @@ export default function UploadDataset() {
                 });
               }}
               >
-              <input multiple={true} onChange={onImageImported} name='images' id="dropzone-file" type="file" className="hidden" formAction={""} accept="image/*"/>
+              <input multiple={true} onChange={onImageImported} name='images' id="dropzone-file" type="file" className="hidden" accept="image/*"/>
 
                 
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -143,7 +146,7 @@ export default function UploadDataset() {
               </label>
 
 
-              <div className='flex mt-4 flex-col justify-between'>
+              <div className='flex flex-col sm:mt-0 mt-4 justify-between'>
                 
                 {!imageImportList.isPreview ? <div></div> :
                 <div>
@@ -156,9 +159,25 @@ export default function UploadDataset() {
                 </div>
                 }
 
-                <input type="submit" value={"Upload Dataset"} className='mt-4 w-full cursor-pointer text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700'></input>
+                {uploadState === 0 ?
+                <>
+                  <input type="submit" value={"Upload Dataset"} className='h-10 mt-4 w-full cursor-pointer text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700'/>
+                </>
+                : uploadState === 2 ?
+                <>
+                  <input type="submit" value={"Done. Upload More?"} className='h-10 mt-4 w-full cursor-pointer text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700'/>
+                </>
+                :
+                <>
+                  <div className='cursor-not-allowed flex justify-center h-10 gap-2 mt-4 w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700'>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg>
+                    <div className=''>Uploading...</div>
+                  </div>
+                </>
+                }
 
 
+                
               </div>
             </div>
 

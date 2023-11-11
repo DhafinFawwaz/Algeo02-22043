@@ -206,7 +206,7 @@ export default function Home() {
                 });
               }}
               >
-              <input onChange={onImageImported} name='image' id="dropzone-file" type="file" className="hidden" formAction={""} accept="image/*"/>
+              <input onChange={onImageImported} name='image' id="dropzone-file" type="file" className="hidden"  accept="image/*"/>
 
                 {
                 imageImport.isPreview ?

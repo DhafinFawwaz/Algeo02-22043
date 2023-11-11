@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { League_Spartan } from 'next/font/google'
 import './globals.css'
 import Link from 'next/link'
-import { headers } from 'next/headers';
 
 const leagueSpartan = League_Spartan({ subsets: ['latin'], display: 'swap' })
 
@@ -16,7 +15,8 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  
+
+
   return (
     <html lang="en" className='dark'>
       <body className={`${leagueSpartan.className} bg-white dark:bg-gray-900`}>
