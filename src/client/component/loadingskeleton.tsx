@@ -4,7 +4,7 @@ export function LoadingSkeleton({maxImagePerPage}: any){
 
     return <>
     <hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"></hr>
-    <div className='bg-slate-800 rounded-lg grid grid-cols-2 sm:grid-cols-3 gap-3 p-3 animate-pulse'>
+    <div className='bg-slate-800 rounded-lg grid grid-cols-2 sm:grid-cols-3 gap-3 p-3'>
     {
       [...Array(maxImagePerPage)].map((e, i) => {
         return <div key={i} className={`
