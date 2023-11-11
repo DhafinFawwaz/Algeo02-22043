@@ -42,30 +42,43 @@ class SearchRequestApiView(APIView):
         (search_result_list,is_hash_exist) = Searcher.getSearchResult(search_request)
         response_result: dict[str, str|int] = []
 
-        serializerRequest = SearchRequestSerializer(data=reqData)
-        if not serializerRequest.is_valid():
-            return Response(serializerRequest.errors, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            for search_result in search_result_list:
-                resData = {
-                    'hash': search_result.hash,
-                    'image_url': search_result.image_url
-                }
-                serializerResult = SearchResultSerializer(data=resData)
+        
+        for search_result in search_result_list:
+            resData = {
+                'hash': search_result.hash,
+                'image_url': search_result.image_url
+            }
+            serializerResult = SearchResultSerializer(data=resData)
 
-                if not serializerResult.is_valid():
-                    return Response(serializerResult.errors, status=status.HTTP_400_BAD_REQUEST)
-                else:
-                    response_result.append(resData)
-                    if not is_hash_exist:
-                        serializerResult.save()
+            if not serializerResult.is_valid():
+                print(serializerResult.errors)
+                return Response(serializerResult.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                response_result.append(resData)
+                if not is_hash_exist:
+                    serializerResult.save()
+
 
         if not is_hash_exist:
             print("Saving search request")
-            serializerRequest.save()
+            
+            pdf = Searcher.getPDFfromImageUrls(response_result)
+            reqData['pdf_result'] = pdf
+
+            serializerRequest = SearchRequestSerializer(data=reqData)
+            if not serializerRequest.is_valid():
+                print(serializerRequest.errors)
+                return Response(serializerRequest.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                serializerRequest.save()
         else:
             print("Return cached search result")
-        return Response(response_result, status=status.HTTP_201_CREATED)
+        
+        response = {
+            'data': response_result,
+            'pdf_url': "/media/result/"+search_request.hash+".pdf"
+        }
+        return Response(response, status=status.HTTP_201_CREATED)
     
 
     # untuk debug

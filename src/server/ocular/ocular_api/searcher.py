@@ -7,7 +7,12 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.conf import settings
 import numpy as np
 from pathlib import Path
-
+from io import BytesIO
+from django.core.files import File
+import os
+import img2pdf
+import tempfile
+from django.core.files.base import ContentFile
 
 class Searcher:
     def generateHash(image_file: InMemoryUploadedFile, search_type: str) -> str:
@@ -19,12 +24,27 @@ class Searcher:
     
 
     # list isinya imagenya, bool nentuin apakah hashnya ada di database atau tidak
-    def getSearchResult(data: SearchRequest) -> Tuple[List[SearchResult],bool]: 
+    def getSearchResult(data: SearchRequest) -> Tuple[List[SearchResult],bool]:
         
         # Kalau data.hash ada di database, ambil semua image yang punya hash yang sama, returnkan
         is_hash_exist: bool = SearchRequest.objects.filter(hash=data.hash).exists()
         if is_hash_exist:
             return (SearchResult.objects.filter(hash=data.hash),is_hash_exist)
+        
+        
+        result: list[SearchResult] = []
+        datasets = DataSet.objects.all()[:21]
+        for dataset in datasets:
+            sr = SearchResult()
+            sr.image_url = dataset.image_request.url
+            sr.hash = data.hash
+            sr.save()
+            result.append(sr)
+
+        return (result, False)
+
+    
+        
         
 
         result: list[SearchResult] = []
@@ -44,7 +64,7 @@ class Searcher:
             # contoh
             # sr = SearchResult()
             # sr.hash = data.hash
-            # sr.image_url = dataset_list[0].image_request.path 
+            # sr.image_url = dataset_list[0].image_request.url 
             # ini image_url cek dulu aku lupa
             # harusnya itu misalnya sr.image_url = /media/dataset/0.jpg
 
@@ -103,4 +123,25 @@ class Searcher:
         
         # return (result, is_hash_exist)
 
-    
+    def getPDFfromImageUrls(search_result_list: list[SearchResult]):
+
+        images = []
+        for search_result in search_result_list:
+            image_path: str = search_result.get('image_url').replace('/','\\')
+            base_path = settings.BASE_DIR
+            full_path: str = str(base_path)+image_path
+            img = Image.open(full_path)
+            images.append(img)
+
+        # Convert images to PDF
+        temp_files = []
+        for idx, img in enumerate(images):
+            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
+            temp_files.append(temp_file.name)
+            img.save(temp_file.name, format="PNG")
+
+        # Convert images to PDF
+        pdf_bytes = img2pdf.convert(temp_files)
+        pdf_content = ContentFile(pdf_bytes, name=search_result_list[0].get('hash')+".pdf")
+
+        return pdf_content

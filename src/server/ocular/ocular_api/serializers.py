@@ -3,7 +3,7 @@ from .models import SearchRequest, SearchResult, DataSet
 class SearchRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = SearchRequest
-        fields = ["hash", "image_request","search_type"]
+        fields = ["hash", "image_request","search_type","pdf_result"]
 
 class SearchResultSerializer(serializers.ModelSerializer):
     class Meta:

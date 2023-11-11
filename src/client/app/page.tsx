@@ -2,6 +2,7 @@
 import Image from 'next/image'
 import { useState } from 'react';
 import { LoadingSkeleton } from '../component/loadingskeleton';
+import Link from 'next/link';
 
 export interface ImageImport{
   src: string,
@@ -17,7 +18,8 @@ export interface ImageResult{
   srcList: SearchResponse[],
   state: number, // 0: none 1: loading 2: ispreview
   maxImagePerPage: number,
-  page: number
+  page: number,
+  pdf_url: string
 }
 
 export default function Home() {
@@ -34,7 +36,8 @@ export default function Home() {
     srcList: [],
     state: 0,
     maxImagePerPage: 6,
-    page: 0
+    page: 0,
+    pdf_url: ""
   });
   const [isHighlightImport, setIsHighlightImport] = useState<boolean>(false);
 
@@ -58,7 +61,7 @@ export default function Home() {
       return;
     }
 
-    setImageResult({srcList: [], state: 1, maxImagePerPage: imageResult.maxImagePerPage, page: 0});
+    setImageResult({srcList: [], state: 1, maxImagePerPage: imageResult.maxImagePerPage, page: 0, pdf_url: ""});
 
     const formData = new FormData(e.currentTarget);
     formData.set("image", imageImport.data!);
@@ -72,7 +75,7 @@ export default function Home() {
     const res = await fetch(url+"/api/search", requestOptions)
       .catch(e => console.log(e));
     // wait 1 second
-    await new Promise(r => setTimeout(r, 3000));
+    // await new Promise(r => setTimeout(r, 3000));
 
     if(!res)return;
     if(res.status === 400){
@@ -85,10 +88,11 @@ export default function Home() {
 
 
     setImageResult({
-      srcList: data.map((res: SearchResponse) => {return {image_url: url+res.image_url}}), 
+      srcList: data.data.map((res: SearchResponse) => {return {image_url: url+res.image_url}}), 
       state: 2, 
       maxImagePerPage: imageResult.maxImagePerPage, 
-      page: 0
+      page: 0,
+      pdf_url: url+data.pdf_url
     });
   }
 
@@ -99,7 +103,8 @@ export default function Home() {
         srcList: imageResult.srcList,
         state: imageResult.state,
         maxImagePerPage: imageResult.maxImagePerPage,
-        page: newPage
+        page: newPage,
+        pdf_url: imageResult.pdf_url
       }
     )
   }
@@ -299,7 +304,7 @@ export default function Home() {
               :
               <>
                 <hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"></hr>
-                <div className='bg-slate-800 rounded-lg grid grid-cols-2 sm:grid-cols-3 gap-3 p-3'>
+                                <div className='bg-slate-800 rounded-lg mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3 p-3'>
                 {
                   imageResult.srcList.map((image: SearchResponse, i: number) => {
                     if(i >= imageResult.page*imageResult.maxImagePerPage
@@ -332,6 +337,15 @@ export default function Home() {
       
               </>
             }
+
+            {imageResult.state === 2 ? 
+              <Link target='_blank' href={imageResult.pdf_url} type="submit" className='text-center mt-4 w-full cursor-pointer text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700'>
+                Download Search Result as PDF
+              </Link>
+              :
+              <></>
+            }
+
 
          
         </article>
