@@ -12,14 +12,16 @@ export interface ImageImport{
   data: File | undefined
 }
 export interface SearchResponse{
-  image_url: string
+  image_url: string,
+  similarity: number
 }
 export interface ImageResult{
   srcList: SearchResponse[],
   state: number, // 0: none 1: loading 2: ispreview
   maxImagePerPage: number,
   page: number,
-  pdf_url: string
+  pdf_url: string,
+  processing_duration: number
 }
 
 export default function Home() {
@@ -37,7 +39,8 @@ export default function Home() {
     state: 0,
     maxImagePerPage: 6,
     page: 0,
-    pdf_url: ""
+    pdf_url: "",
+    processing_duration: 0
   });
   const [isHighlightImport, setIsHighlightImport] = useState<boolean>(false);
 
@@ -61,7 +64,7 @@ export default function Home() {
       return;
     }
 
-    setImageResult({srcList: [], state: 1, maxImagePerPage: imageResult.maxImagePerPage, page: 0, pdf_url: ""});
+    setImageResult({srcList: [], state: 1, maxImagePerPage: imageResult.maxImagePerPage, page: 0, pdf_url: "", processing_duration: 0});
 
     const formData = new FormData(e.currentTarget);
     formData.set("image", imageImport.data!);
@@ -71,7 +74,7 @@ export default function Home() {
       body: formData,
     };
 
-
+    const startTime = new Date().getTime();
     const res = await fetch(url+"/api/search", requestOptions)
       .catch(e => console.log(e));
     // wait 1 second
@@ -92,7 +95,8 @@ export default function Home() {
       state: 2, 
       maxImagePerPage: imageResult.maxImagePerPage, 
       page: 0,
-      pdf_url: url+data.pdf_url
+      pdf_url: url+data.pdf_url,
+      processing_duration: (new Date().getTime() - startTime)/1000
     });
   }
 
@@ -104,7 +108,8 @@ export default function Home() {
         state: imageResult.state,
         maxImagePerPage: imageResult.maxImagePerPage,
         page: newPage,
-        pdf_url: imageResult.pdf_url
+        pdf_url: imageResult.pdf_url,
+        processing_duration: 0
       }
     )
   }
@@ -300,11 +305,19 @@ export default function Home() {
               <></>
               :
               imageResult.state === 1 ?
-              <LoadingSkeleton maxImagePerPage={6}></LoadingSkeleton>
+              <>
+                <LoadingSkeleton maxImagePerPage={6}></LoadingSkeleton>
+              </>
               :
               <>
-                <hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"></hr>
-                                <div className='bg-slate-800 rounded-lg mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3 p-3'>
+                <hr className="h-px mt-8 mb-4 bg-gray-200 border-0 dark:bg-gray-700"></hr>
+                
+                <div className='flex justify-between'>
+                  <h2 className='text-lg font-bold'>Result:</h2>
+                  <h2 className='text'>{imageResult.srcList.length} results in {imageResult.processing_duration} seconds.</h2>
+                </div>
+                
+                <div className='bg-slate-800 rounded-lg mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3 p-3'>
                 {
                   imageResult.srcList.map((image: SearchResponse, i: number) => {
                     if(i >= imageResult.page*imageResult.maxImagePerPage

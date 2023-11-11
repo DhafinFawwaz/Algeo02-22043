@@ -3,12 +3,15 @@
 export function LoadingSkeleton({maxImagePerPage}: any){
 
     return <>
-    <hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"></hr>
-    <div className='bg-slate-800 rounded-lg grid grid-cols-2 sm:grid-cols-3 gap-3 p-3'>
+    <hr className="h-px mt-8 mb-4 bg-gray-200 border-0 dark:bg-gray-700"></hr>
+    <div className='flex justify-between'>
+      <h2 className='text-lg font-bold'>Result:</h2>
+    </div>
+    <div className='bg-slate-800 rounded-lg mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3 p-3 animate-pulse'>
     {
       [...Array(maxImagePerPage)].map((e, i) => {
         return <div key={i} className={`
-        w-full h-32 bg-slate-700 rounded-lg
+        w-full h-36 bg-slate-700 rounded-lg
         `}></div>
       })
     }
