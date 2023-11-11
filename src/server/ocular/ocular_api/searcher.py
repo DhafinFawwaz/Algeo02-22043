@@ -1,5 +1,5 @@
 from django.http import HttpResponseBadRequest
-from .models import SearchRequest, SearchResult
+from .models import SearchRequest, SearchResult, DataSet
 from PIL import Image
 from typing import List, Tuple
 import hashlib
@@ -17,10 +17,55 @@ class Searcher:
         print("Hash generated:", sha256_hash)
         return sha256_hash
     
-    def getSearchResult(data: SearchRequest) -> Tuple[List[SearchResult],bool]:
+
+    # list isinya imagenya, bool nentuin apakah hashnya ada di database atau tidak
+    def getSearchResult(data: SearchRequest) -> Tuple[List[SearchResult],bool]: 
         
-        print("Test==================")
-        return ([],True)
+        # Kalau data.hash ada di database, ambil semua image yang punya hash yang sama, returnkan
+        is_hash_exist: bool = SearchRequest.objects.filter(hash=data.hash).exists()
+        if is_hash_exist:
+            return (SearchResult.objects.filter(hash=data.hash),is_hash_exist)
+        
+
+        result: list[SearchResult] = []
+        if data.search_type == 0: # by texture
+            print("Start searching by texture")
+            # ambil semua di database
+            dataset_list: list[DataSet] = DataSet.objects.all()
+
+            # hitung texture_component dari data.image_request
+
+            # hitung (multiprocessing) cosine similarity dari texture_components dengan dataset.texture_components
+            # kalau > 0.6, append result beserta similaritynya
+            
+            # sort result berdasarkan similarity
+
+            
+            # contoh
+            # sr = SearchResult()
+            # sr.hash = data.hash
+            # sr.image_url = dataset_list[0].image_request.path 
+            # ini image_url cek dulu aku lupa
+            # harusnya itu misalnya sr.image_url = /media/dataset/0.jpg
+
+            # result.append(sr)
+
+
+            return (result,False)
+        else: # by color
+            print("Start searching by color")
+            # ambil semua di database
+            dataset_list: list[DataSet] = DataSet.objects.all()
+            
+            # hitung color_histogram dari data.image_request
+
+            # hitung (multiprocessing) cosine similarity dari color_histogram dengan dataset.color_histogram
+            # kalau > 0.6, append result beserta similaritynya
+            
+            # sort result berdasarkan similarity
+
+
+            return (result,False)
 
         images_path = Path(settings.MEDIA_ROOT).glob('*.*')
         for image_path in images_path:
@@ -33,10 +78,7 @@ class Searcher:
         return ([],True)
 
         
-        # Kalau data.hash ada di database, ambil semua image yang punya hash yang sama, returnkan
-        is_hash_exist: bool = SearchRequest.objects.filter(hash=data.hash).exists()
-        if is_hash_exist:
-            return (SearchResult.objects.filter(hash=data.hash),is_hash_exist)
+        
 
         # cara akses image
         # letaknya semuanya di folder media
@@ -52,13 +94,13 @@ class Searcher:
 
         # print("Showing image:", data.image_request.name)
 
-        result: list[SearchResult] = []
-        for i in range(15):
-            sr = SearchResult()
-            sr.hash = data.hash
-            sr.image_url = "/media/download.jpeg"
-            result.append(sr)
+        # result: list[SearchResult] = []
+        # for i in range(15):
+        #     sr = SearchResult()
+        #     sr.hash = data.hash
+        #     sr.image_url = "/media/download.jpeg"
+        #     result.append(sr)
         
-        return (result, is_hash_exist)
+        # return (result, is_hash_exist)
 
     

@@ -73,7 +73,6 @@ class SearchRequestApiView(APIView):
         searchReq = SearchRequest.objects.all()
         searchReqJson = SearchRequestSerializer(searchReq, many=True).data
         return Response(searchReqJson, status=status.HTTP_200_OK)
-    
 
 class SearchResultApiView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -99,7 +98,9 @@ class UploadDatasetApiView(APIView):
             limit = int(request.query_params.get('limit'))
             all_data = all_data[:limit]
         
+        start_time = time()
         list_dataset_serializer = DataSetSerializer(all_data,many=True)
+        print("Serializing took", time()-start_time, "seconds")
         return Response(list_dataset_serializer.data, status=status.HTTP_201_CREATED)
     
 
@@ -109,6 +110,9 @@ class UploadDatasetApiView(APIView):
         image_list = request.data.getlist('images')
         if image_list[0] == '': # can happen because of the way FormData works
             image_list.pop(0)
+
+        # Delete semua SearchResult
+        SearchResult.objects.all().delete()
 
         start = time()
         Uploader.saveImages(image_list)

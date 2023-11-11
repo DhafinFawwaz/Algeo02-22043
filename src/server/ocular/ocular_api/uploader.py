@@ -61,7 +61,7 @@ class Uploader:
         # Bulk create all DataSet objects at once
         DataSet.objects.bulk_create(data_list)
         with Pool(cpu_count) as pool:
-            pool.map(Uploader.task_multiprocess, [data.pk for data in data_list])
+            pool.map_async(Uploader.task_multiprocess, [data.pk for data in data_list])
             pool.close()
             pool.join()
 
