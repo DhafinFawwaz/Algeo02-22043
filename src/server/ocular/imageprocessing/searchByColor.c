@@ -155,7 +155,7 @@ void HSVtoHistElmt(int *Hist, int R, int G, int B)
 }
 
 // Ukuran image harus diketahui sebelum menggunakan HSVtoHistArray
-void HSVtoHistArray(int *Hist, int *img_matrix_x, int *img_matrix_y, int ***img_matrix)
+void HSVtoHistArray(int *Hist, int img_matrix_x, int img_matrix_y, int ***img_matrix)
 {
     for (int i = 0; i < img_matrix_x; i++)
     {
@@ -166,13 +166,15 @@ void HSVtoHistArray(int *Hist, int *img_matrix_x, int *img_matrix_y, int ***img_
     }
 }
 
-float* getColorHistogram(int*** matrix, int row, int col) {
-    float* colorHistogram;
-    colorHistogram = (float*) malloc(sizeof(float) * HSV_HIST_SIZE);
+float *getColorHistogram(int ***matrix, int row, int col)
+{
+    float *colorHistogram;
+    colorHistogram = (float *)malloc(sizeof(float) * HSV_HIST_SIZE);
     colorHistogram[3] = 100;
     return colorHistogram;
 }
 
-void free_ptr(float* arr) {
+void free_ptr(float *arr)
+{
     free(arr);
 }
