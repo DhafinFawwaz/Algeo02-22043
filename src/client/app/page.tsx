@@ -326,10 +326,7 @@ export default function Home() {
             }
           <hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"></hr>
 
-          {/* Upload Dataset */}
-
-          <button type="submit" className='w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700'>Upload Dataset</button>
-
+         
         </article>
       </div>
     </main>

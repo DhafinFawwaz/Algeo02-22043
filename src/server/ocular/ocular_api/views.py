@@ -95,6 +95,10 @@ class UploadDatasetApiView(APIView):
 
     def get(self, request, *args, **kwargs):
         all_data = DataSet.objects.all()
+        if request.query_params.get('limit'):
+            limit = int(request.query_params.get('limit'))
+            all_data = all_data[:limit]
+        
         list_dataset_serializer = DataSetSerializer(all_data,many=True)
         return Response(list_dataset_serializer.data, status=status.HTTP_201_CREATED)
     

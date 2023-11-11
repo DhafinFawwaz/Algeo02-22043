@@ -55,7 +55,6 @@ export default function UploadDataset() {
     const res = await fetch(url+"/api/upload/dataset", requestOptions)
       .catch(e => console.log(e));
     // wait 1 second
-    await new Promise(r => setTimeout(r, 3000));
 
     if(!res)return;
     if(res.status === 400){

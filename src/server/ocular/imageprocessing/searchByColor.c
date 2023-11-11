@@ -167,7 +167,6 @@ void HSVtoHistArray(int *Hist, int *img_matrix_x, int *img_matrix_y, int ***img_
 }
 
 float* getColorHistogram(int*** matrix, int row, int col) {
-    printf("getColorHistogram\n");
     float* colorHistogram;
     colorHistogram = (float*) malloc(sizeof(float) * HSV_HIST_SIZE);
     colorHistogram[3] = 100;

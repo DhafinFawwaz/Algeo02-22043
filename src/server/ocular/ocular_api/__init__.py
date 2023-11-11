@@ -11,3 +11,4 @@ ImageProcessing.by_color.free_ptr.argtypes = [POINTER(c_float)]
 ImageProcessing.by_texture.getTextureComponents.argtypes = [POINTER(POINTER(POINTER(c_int))), c_int, c_int]
 ImageProcessing.by_texture.getTextureComponents.restype = POINTER(c_float)
 ImageProcessing.by_texture.free_ptr.argtypes = [POINTER(c_float)]
+
