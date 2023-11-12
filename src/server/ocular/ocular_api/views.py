@@ -27,17 +27,13 @@ class SearchRequestApiView(APIView):
         image_request_data.seek(0)
         search_type: int = request.data.get('search_type')
 
-        reqData = {
-            'hash': Searcher.generateHash(image_request_data,search_type), 
-            'image_request': image_request_data, 
-            'search_type': search_type, 
-        }
-        image_request_data.seek(0) # reset cursor. prevent error invalid_image
         
         search_request: SearchRequest = SearchRequest()
-        search_request.image_request = reqData.get("image_request")
-        search_request.hash = reqData.get("hash")
-        search_request.search_type = reqData.get("search_type")
+        search_request.image_request = image_request_data
+        search_request.hash = Searcher.generateHash(image_request_data,search_type)
+        search_request.search_type = search_type
+
+        image_request_data.seek(0) # reset cursor. prevent error invalid_image becase of generateHash
 
         (search_result_list,is_hash_exist) = Searcher.getSearchResult(search_request)
         
@@ -45,15 +41,8 @@ class SearchRequestApiView(APIView):
             print("Saving search request and results")
             SearchResult.objects.bulk_create(search_result_list)
             
-            pdf = Searcher.getPDFfromImageUrls(search_result_list)
-            reqData['pdf_result'] = pdf
-
-            serializerRequest = SearchRequestSerializer(data=reqData)
-            if not serializerRequest.is_valid():
-                print(serializerRequest.errors)
-                return Response(serializerRequest.errors, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                serializerRequest.save()
+            search_request.pdf_result = Searcher.getPDFfromImageUrls(search_result_list)
+            search_request.save()
         else:
             print("Return cached search result")
         

@@ -29,7 +29,7 @@ class Searcher:
         # Kalau data.hash ada di database, ambil semua image yang punya hash yang sama, returnkan
         is_hash_exist: bool = SearchRequest.objects.filter(hash=data.hash).exists()
         if is_hash_exist:
-            return (SearchResult.objects.filter(hash=data.hash),is_hash_exist)
+            return (SearchResult.objects.filter(hash=data.hash),True)
         
 
         result: list[SearchResult] = []
