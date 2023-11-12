@@ -75,16 +75,44 @@ class Searcher:
             return (result,False)
         else: # by color
             print("Start searching by color")
+
+            color_lib = CDLL('../imageprocessing/searchByColor.so')
+            cos_sim_lib = CDLL('../imageprocessing/cosinesimilarity.so')
+
             # ambil semua di database
             dataset_list: list[DataSet] = DataSet.objects.all()
             
+            # variables needed
+
             # hitung color_histogram dari data.image_request
+            getColorHistogram = color_lib.getColorHistogram
+            getColorHistogram.argtypes = [POINTER(POINTER(POINTER(c_int))), c_int, c_int]
+            getColorHistogram.restypes = POINTER(POINTER(POINTER(c_float)))
+
+            free_ptr = color_lib.free_ptr
+            free_ptr.argtypes = [POINTER(c_float),]
+
+            SearchReq_matrix = SearchRequest.convert("RGB")
+            SearchReq_matrix = np.array(SearchReq_matrix)
+
+            cos_sim = cos_sim_lib.cosineSimilarity
+            cos_sim.argtypes = [POINTER(c_int), POINTER(c_int), c_int]
+            cos_sim.restypes = c_double
+
+            color_histogram = getColorHistogram(SearchReq_matrix, len(SearchReq_matrix), len(SearchReq_matrix[0]))
 
             # hitung (multiprocessing) cosine similarity dari color_histogram dengan dataset.color_histogram
             # kalau > 0.6, append result beserta similaritynya
+            result_array = []
+            result_array_sim = []
+            for i in range (len(dataset_list)):
+                SearchRes_matrix = dataset_list[i].convert("RGB")
+                SearchRes_matrix = np.array(SearchRes_matrix)
+                color_histogram_res = getColorHistogram(SearchRes_matrix, len(SearchRes_matrix), len(SearchRes_matrix[0]))
+                if (cos_sim(color_histogram, color_histogram_res, 72) > 0.6):
+                    result_array.append(dataset_list[i])
             
             # sort result berdasarkan similarity
-
 
             return (result,False)
 
