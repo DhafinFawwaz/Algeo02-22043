@@ -16,32 +16,36 @@ int levels = GLCM_SIZE;
 
 double similarity = 0;
 
-int test(int a){
-    return a*4;
+int test(int a)
+{
+    return a * 4;
 }
 
-
-double cosineSimilarity(int *A, int *B, int vectorSize){
+double cosineSimilarity(int *A, int *B, int vectorSize)
+{
     double dotProduct = 0.0;
     double normA = 0.0;
     double normB = 0.0;
     int i = 0;
-    for(i = 0; i < vectorSize; i++){
+    for (i = 0; i < vectorSize; i++)
+    {
         dotProduct += A[i] * B[i];
         normA += A[i] * A[i];
         normB += B[i] * B[i];
     }
     return dotProduct / (sqrt(normA) * sqrt(normB));
 }
-int generateSomething(){
+int generateSomething()
+{
 
     int i = 0;
-    for(i = 0; i < GLCM_SIZE*GLCM_SIZE; i++){
-        int x = i/GLCM_SIZE;
-        int y = i%GLCM_SIZE;
-        contrast += M[x][y] * (x-y) * (x-y);
-        dissimilarity += M[x][y] * abs(x-y);
-        homogeneity += M[x][y] / (1 + (x-y)*(x-y));
+    for (i = 0; i < GLCM_SIZE * GLCM_SIZE; i++)
+    {
+        int x = i / GLCM_SIZE;
+        int y = i % GLCM_SIZE;
+        contrast += M[x][y] * (x - y) * (x - y);
+        dissimilarity += M[x][y] * abs(x - y);
+        homogeneity += M[x][y] / (1 + (x - y) * (x - y));
         ASM += M[x][y] * M[x][y];
         entropy += M[x][y] * log(M[x][y]);
     }
@@ -51,14 +55,15 @@ int generateSomething(){
     int A[COSINE_SIMILARITY_VECTOR_SIZE];
     int B[COSINE_SIMILARITY_VECTOR_SIZE];
 
-    similarity = cosineSimilarity(A,B,COSINE_SIMILARITY_VECTOR_SIZE);
+    similarity = cosineSimilarity(A, B, COSINE_SIMILARITY_VECTOR_SIZE);
 
     return 0;
 }
 
-float* getTextureComponents(int*** matrix, int row, int col) {
-    float* textureComponents;
-    textureComponents = (float*) malloc(sizeof(float) * COSINE_SIMILARITY_VECTOR_SIZE);
+float *getTextureComponents(int ***matrix, int row, int col)
+{
+    float *textureComponents;
+    textureComponents = (float *)malloc(sizeof(float) * COSINE_SIMILARITY_VECTOR_SIZE);
     textureComponents[0] = 100;
     textureComponents[1] = 100;
     textureComponents[2] = 100;
@@ -68,6 +73,7 @@ float* getTextureComponents(int*** matrix, int row, int col) {
     return textureComponents;
 }
 
-void free_ptr(float* arr) {
+void free_ptr(float *arr)
+{
     free(arr);
 }

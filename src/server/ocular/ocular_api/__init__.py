@@ -1,4 +1,4 @@
-from ctypes import cdll, CDLL, c_void_p, c_int, c_float, POINTER
+from ctypes import cdll, CDLL, c_void_p, c_int, c_float, c_double, POINTER
 from .apps import ImageProcessing
 
 ImageProcessing.by_color = cdll.LoadLibrary("imageprocessing/searchByColor.so")
@@ -11,4 +11,7 @@ ImageProcessing.by_color.free_ptr.argtypes = [POINTER(c_float)]
 ImageProcessing.by_texture.getTextureComponents.argtypes = [POINTER(POINTER(POINTER(c_int))), c_int, c_int]
 ImageProcessing.by_texture.getTextureComponents.restype = POINTER(c_float)
 ImageProcessing.by_texture.free_ptr.argtypes = [POINTER(c_float)]
+
+ImageProcessing.by_texture.cosineSimilarity.argtypes = [POINTER(c_int), POINTER(c_int), c_int]
+ImageProcessing.by_texture.cosineSimilarity.restype = c_double
 
