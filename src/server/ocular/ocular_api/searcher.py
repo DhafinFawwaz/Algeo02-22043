@@ -14,6 +14,7 @@ import img2pdf
 import tempfile
 from django.core.files.base import ContentFile
 from .apps import ImageProcessing
+from ctypes import cast, POINTER, c_int
 
 class Searcher:
     def generateHash(image_file: InMemoryUploadedFile, search_type: str) -> str:
@@ -80,8 +81,12 @@ class Searcher:
             # hitung color_histogram dari data.image_request
             SearchReq_matrix = SearchRequest.convert("RGB")
             SearchReq_matrix = np.array(SearchReq_matrix)
+            Req_row = len(SearchReq_matrix)
+            Req_col = len(SearchReq_matrix[0])
+            ReqC = np.ctypeslib.as_ctypes(SearchReq_matrix)
+            pointer_to_req = cast(ReqC, POINTER(POINTER(POINTER(c_int))))
 
-            color_histogram = ImageProcessing.by_color.getColorHistogram(SearchReq_matrix, len(SearchReq_matrix), len(SearchReq_matrix[0]))
+            color_histogram = ImageProcessing.by_color.getColorHistogram(pointer_to_req, Req_row, Req_col)
 
             # hitung (multiprocessing) cosine similarity dari color_histogram dengan dataset.color_histogram
             # kalau > 0.6, append result beserta similaritynya
@@ -93,9 +98,13 @@ class Searcher:
                 sr.hash = data.hash
                 SearchRes_matrix = sr.convert("RGB")
                 SearchRes_matrix = np.array(SearchRes_matrix)
-                color_histogram_res = ImageProcessing.by_color.getColorHistogram(SearchRes_matrix, len(SearchRes_matrix), len(SearchRes_matrix[0]))
-                if (ImageProcessing.by_texture.cosineSimilarity(color_histogram, color_histogram_res, 72) > 0.6):
-                    result.append(sr)
+                Res_row = len(SearchRes_matrix)
+                Res_col = len(SearchRes_matrix[0])
+                ResC = np.ctypeslib.as_ctypes(SearchRes_matrix)
+                pointer_to_res = cast(ResC, POINTER(POINTER(POINTER(c_int))))
+                color_histogram_res = ImageProcessing.by_color.getColorHistogram(pointer_to_res, Res_row, Res_col)
+                # if (ImageProcessing.by_texture.cosineSimilarity(color_histogram, color_histogram_res, 72) > 0.6):
+                #     result.append(sr)
             
             # sort result berdasarkan similarity
             return (result, False)

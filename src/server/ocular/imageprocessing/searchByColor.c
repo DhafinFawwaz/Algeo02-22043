@@ -146,36 +146,46 @@ int getVValue(double r, double g, double b)
 // R, G, B, NOT normalized
 void HSVtoHistElmt(int *Hist, int R, int G, int B)
 {
+    // printf("pass1\n");
     int H, S, V;
     H = getHValue(R, G, B);
     S = getSValue(R, G, B);
     V = getVValue(R, G, B);
-    int idx = H * 8 + S * 3 + V;
+    // printf("pass2\n");
+    int idx = H * 9 + S * 3 + V;
+    // printf("pass3\n");
     Hist[idx] += 1;
+    // printf("pass4\n");
 }
 
 // Ukuran image harus diketahui sebelum menggunakan HSVtoHistArray
-void HSVtoHistArray(int Hist, int img_matrix_x, int img_matrix_y, int ***img_matrix)
+void HSVtoHistArray(int *Hist, int img_matrix_x, int img_matrix_y, int ***img_matrix)
 {
     for (int i = 0; i < img_matrix_x; i++)
     {
         for (int j = 0; j < img_matrix_y; j++)
         {
+            // printf("pass\n");
             HSVtoHistElmt(Hist, img_matrix[i][j][0], img_matrix[i][j][1], img_matrix[i][j][2]);
         }
     }
 }
 
-float *getColorHistogram(int ***matrix, int row, int col)
+int *getColorHistogram(int ***matrix, int row, int col)
 {
-    float *colorHistogram;
-    colorHistogram = (float *)malloc(sizeof(float) * HSV_HIST_SIZE);
+    int *colorHistogram;
+    colorHistogram = (int *)malloc(sizeof(int) * HSV_HIST_SIZE);
+    for (int i = 0; i < HSV_HIST_SIZE; i++)
+    {
+        colorHistogram[i] = 0;
+        // printf("%d ", colorHistogram[i]);
+    }
 
     HSVtoHistArray(colorHistogram, row, col, matrix);
     return colorHistogram;
 }
 
-void free_ptr(float *arr)
+void free_ptr(int *arr)
 {
     free(arr);
 }
