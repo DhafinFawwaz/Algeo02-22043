@@ -12,6 +12,7 @@ class SearchRequest(models.Model):
 class SearchResult(models.Model):
     hash = models.TextField(default="", blank=True) # untuk optimisasi
     image_url = models.TextField(default="", blank=True) # yg bisa diakses secara publik url_backend+image_url
+    similarity = models.FloatField(default=0, blank=True) # hasil cosine similarity
 
     def __str__(self):
         return self.task

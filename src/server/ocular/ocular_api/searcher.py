@@ -31,13 +31,14 @@ class Searcher:
         if is_hash_exist:
             return (SearchResult.objects.filter(hash=data.hash),is_hash_exist)
         
-        
+
         result: list[SearchResult] = []
         datasets = DataSet.objects.all()[:21]
         for dataset in datasets:
             sr = SearchResult()
             sr.image_url = dataset.image_request.url
             sr.hash = data.hash
+            sr.similarity = 0.5
             sr.save()
             result.append(sr)
 

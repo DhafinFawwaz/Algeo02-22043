@@ -46,7 +46,8 @@ class SearchRequestApiView(APIView):
         for search_result in search_result_list:
             resData = {
                 'hash': search_result.hash,
-                'image_url': search_result.image_url
+                'image_url': search_result.image_url,
+                'similarity': search_result.similarity,
             }
             serializerResult = SearchResultSerializer(data=resData)
 
@@ -116,7 +117,6 @@ class UploadDatasetApiView(APIView):
         print("Serializing took", time()-start_time, "seconds")
         return Response(list_dataset_serializer.data, status=status.HTTP_201_CREATED)
     
-
     
     def post(self, request, *args, **kwargs):
         
@@ -132,6 +132,33 @@ class UploadDatasetApiView(APIView):
         print("Saving images took", time()-start, "seconds")
 
         return Response("", status=status.HTTP_201_CREATED)
+    
+        # delete all SearchResult
+
+class ScrapDatasetApiView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        
+        web_url = request.data.get('web_url')
+
+        (new_dataset_list, status) = Uploader.scrapImages(web_url)
+        response = {
+            'data': [],
+        }
+
+        for dataset in new_dataset_list:
+            resData = {
+                'hash': "",
+                'image_url': dataset.image_request.url,
+                'similarity': 0,
+            }
+            response['data'].append(resData)
+        
+
+        # return Response(response, status=status)
+        return Response(response, status=status)
+
     
         # delete all SearchResult
 

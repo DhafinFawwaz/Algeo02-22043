@@ -91,7 +91,7 @@ export default function Home() {
 
 
     setImageResult({
-      srcList: data.data.map((res: SearchResponse) => {return {image_url: url+res.image_url}}), 
+      srcList: data.data.map((res: SearchResponse) => {return {image_url: url+res.image_url, similarity: res.similarity}}), 
       state: 2, 
       maxImagePerPage: imageResult.maxImagePerPage, 
       page: 0,
@@ -100,6 +100,7 @@ export default function Home() {
     });
   }
 
+  // #region Pagination ================================
   function changePage(newPage: number){
     if(newPage < 0 || newPage > imageResult.srcList.length/imageResult.maxImagePerPage) return;
     setImageResult(
@@ -113,7 +114,6 @@ export default function Home() {
       }
     )
   }
-
   function getPaginationButton(newPage: number): JSX.Element{
     if(newPage == imageResult.page){
       return <div key={newPage} className='sm:w-10 sm:h-10 w-8 h-8 text-gray-900 bg-white border border-gray-300 font-medium rounded-lg text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 sm:pt-2.5 pt-1.5 text-center align-middle'>{newPage+1}</div>
@@ -123,7 +123,6 @@ export default function Home() {
   function getPaginationDot(key: number): JSX.Element{
     return <div key={key} className='w-5 text-center flex flex-col-reverse'>...</div>
   }
-
   function getPaginationButtonList(): JSX.Element[]{
     let buttonList: JSX.Element[] = [];
     if (imageResult.srcList.length/imageResult.maxImagePerPage <= 7){
@@ -165,6 +164,7 @@ export default function Home() {
     
       
   }
+  // #endregion Pagination End ================================
 
 
   return (
@@ -288,7 +288,12 @@ export default function Home() {
                       </li>
                   </ul>
 
-                  <input type="submit" value={"Search Image"} className='w-full cursor-pointer text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700'></input>
+                  <input disabled={imageResult.state === 1} type="submit" value={
+                    imageResult.state == 0 ? "Search Image"
+                    : imageResult.state == 1 ? "Searching..."
+                    : imageResult.state == 2 ? "Done. Search again?"
+                    : "Error. Start again?"
+                    } className={`${imageResult.state === 1 ? 'cursor-not-allowed':'cursor-pointer'} w-full cursor-pointer text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700`}></input>
                 </div>
 
 
@@ -325,8 +330,9 @@ export default function Home() {
                       ){
                         return  <a href={image.image_url} target='_blank' key={i} className='w-full h-36 bg-slate-700 rounded-lg relative cursor-pointer group'>
                                   <img className='object-cover w-full h-full rounded-lg absolute' src={image.image_url}/>
-                                  <div className='opacity-0 group-hover:opacity-50 duration-150 bg-black h-full w-full z-30 rounded-lg absolute flex flex-col-reverse'>
+                                  <div className='opacity-0 group-hover:opacity-50 duration-150 bg-black h-full w-full z-30 rounded-lg absolute flex flex-col-reverse justify-between'>
                                     <div className='truncate ... z-50 px-2 pb-0.5'>{image.image_url}</div>
+                                    <div className='z-50 px-2 pt-1 text-end'>{`${image.similarity*100}%`}</div>
                                   </div>
                                 </a>  
                       }
