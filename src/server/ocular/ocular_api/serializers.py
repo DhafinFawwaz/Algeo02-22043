@@ -8,7 +8,7 @@ class SearchRequestSerializer(serializers.ModelSerializer):
 class SearchResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = SearchResult
-        fields = ["hash", "image_url"]
+        fields = ["hash", "image_url", "similarity"]
 
 class DataSetSerializer(serializers.ModelSerializer):
     texture_components = serializers.ListField(child=serializers.FloatField())

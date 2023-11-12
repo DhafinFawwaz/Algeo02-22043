@@ -40,30 +40,12 @@ class SearchRequestApiView(APIView):
         search_request.search_type = reqData.get("search_type")
 
         (search_result_list,is_hash_exist) = Searcher.getSearchResult(search_request)
-        response_result: dict[str, str|int] = []
-
         
-        for search_result in search_result_list:
-            resData = {
-                'hash': search_result.hash,
-                'image_url': search_result.image_url,
-                'similarity': search_result.similarity,
-            }
-            serializerResult = SearchResultSerializer(data=resData)
-
-            if not serializerResult.is_valid():
-                print(serializerResult.errors)
-                return Response(serializerResult.errors, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                response_result.append(resData)
-                if not is_hash_exist:
-                    serializerResult.save()
-
-
         if not is_hash_exist:
-            print("Saving search request")
+            print("Saving search request and results")
+            SearchResult.objects.bulk_create(search_result_list)
             
-            pdf = Searcher.getPDFfromImageUrls(response_result)
+            pdf = Searcher.getPDFfromImageUrls(search_result_list)
             reqData['pdf_result'] = pdf
 
             serializerRequest = SearchRequestSerializer(data=reqData)
@@ -75,8 +57,10 @@ class SearchRequestApiView(APIView):
         else:
             print("Return cached search result")
         
+        
+        serialized_data = SearchResultSerializer(search_result_list, many=True).data
         response = {
-            'data': response_result,
+            'data': serialized_data,
             'pdf_url': "/media/result/"+search_request.hash+".pdf"
         }
         return Response(response, status=status.HTTP_201_CREATED)

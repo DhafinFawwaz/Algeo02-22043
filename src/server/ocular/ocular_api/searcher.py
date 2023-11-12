@@ -39,7 +39,6 @@ class Searcher:
             sr.image_url = dataset.image_request.url
             sr.hash = data.hash
             sr.similarity = 0.5
-            sr.save()
             result.append(sr)
 
         return (result, False)
@@ -156,7 +155,7 @@ class Searcher:
 
         images = []
         for search_result in search_result_list:
-            image_path: str = search_result.get('image_url').replace('/','\\')
+            image_path: str = search_result.image_url.replace('/','\\')
             base_path = settings.BASE_DIR
             full_path: str = str(base_path)+image_path
             img = Image.open(full_path)
@@ -171,6 +170,6 @@ class Searcher:
 
         # Convert images to PDF
         pdf_bytes = img2pdf.convert(temp_files)
-        pdf_content = ContentFile(pdf_bytes, name=search_result_list[0].get('hash')+".pdf")
+        pdf_content = ContentFile(pdf_bytes, name=search_result_list[0].hash+".pdf")
 
         return pdf_content
