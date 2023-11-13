@@ -34,6 +34,7 @@ __pycache__/
 *.so
 !searchByTexture.so
 !searchByColor.so
+!calcSimilarity.so
 
 # Distribution / packaging
 .Python

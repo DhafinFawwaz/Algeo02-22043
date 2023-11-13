@@ -88,7 +88,8 @@ class Searcher:
             # variables needed
 
             # hitung color_histogram dari data.image_request
-            SearchReq_matrix = SearchRequest.convert("RGB")
+            SearchReq_matrix = Image.open(data.image_request)
+            SearchReq_matrix = SearchReq_matrix.convert("RGB")
             SearchReq_matrix = np.array(SearchReq_matrix)
             Req_row = len(SearchReq_matrix)
             Req_col = len(SearchReq_matrix[0])
@@ -100,20 +101,25 @@ class Searcher:
             # hitung (multiprocessing) cosine similarity dari color_histogram dengan dataset.color_histogram
             # kalau > 0.6, append result beserta similaritynya
             result: list[SearchResult] = []
-            datasets = DataSet.objects.all()[:21]
-            for dataset in datasets:
+            # datasets = DataSet.objects.all()
+            for dataset in dataset_list:
+                # print(settings.MEDIA_ROOT)
+                # print(settings.PUBLIC_ROOT)
                 sr = SearchResult()
                 sr.image_url = dataset.image_request.url
                 sr.hash = data.hash
-                SearchRes_matrix = sr.convert("RGB")
+                sr_path = sr.image_url.replace("/", "\\")
+                b_path = settings.BASE_DIR
+                SearchRes_matrix = Image.open(str(b_path) + sr.image_url)
+                SearchRes_matrix = SearchRes_matrix.convert("RGB")
                 SearchRes_matrix = np.array(SearchRes_matrix)
                 Res_row = len(SearchRes_matrix)
                 Res_col = len(SearchRes_matrix[0])
                 ResC = np.ctypeslib.as_ctypes(SearchRes_matrix)
                 pointer_to_res = cast(ResC, POINTER(POINTER(POINTER(c_int))))
                 color_histogram_res = ImageProcessing.by_color.getColorHistogram(pointer_to_res, Res_row, Res_col)
-                # if (ImageProcessing.by_texture.cosineSimilarity(color_histogram, color_histogram_res, 72) > 0.6):
-                #     result.append(sr)
+                if (ImageProcessing.cos_sim.cosineSimilarity(color_histogram, color_histogram_res, 72) > 0.6):
+                    result.append(sr)
             
             # sort result berdasarkan similarity
             return (result, False)
