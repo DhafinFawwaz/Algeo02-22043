@@ -70,6 +70,7 @@ MEDIA_URL = '/media/'
 
 # Path where media is stored
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+# PUBLIC_ROOT = os.path.join(BASE_DIR, '/')
 
 
 ROOT_URLCONF = 'ocular.urls'
