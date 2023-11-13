@@ -4,72 +4,66 @@
 #define GLCM_SIZE 255
 #define COSINE_SIMILARITY_VECTOR_SIZE 6
 
-int contrast = 0;
-int dissimilarity = 0;
-int homogeneity = 0;
-int ASM = 0;
-int energy = 0;
-int entropy = 0;
-
 int M[GLCM_SIZE][GLCM_SIZE];
 int levels = GLCM_SIZE;
 
-double similarity = 0;
+int Res[GLCM_SIZE][GLCM_SIZE];
+int grayS[2];
 
-int test(int a)
-{
-    return a * 4;
+void getGrayS(int* a,int* b){
+    grayS[0] = round(0.29 * a[0] + 0.587 * a[1] + 0.114 * a[2]);
+    grayS[1] = round(0.29 * b[0] + 0.587 * b[1] + 0.114 * b[2]);
 }
 
-double cosineSimilarity(int *A, int *B, int vectorSize)
-{
-    double dotProduct = 0.0;
-    double normA = 0.0;
-    double normB = 0.0;
-    int i = 0;
-    for (i = 0; i < vectorSize; i++)
-    {
-        dotProduct += A[i] * B[i];
-        normA += A[i] * A[i];
-        normB += B[i] * B[i];
+void toGLCM(int*** fromPicture, int height, int width){
+    double sum = height*(width-1);
+    for(int i=0;i<height;i++){
+        for(int j=0;j<width-1;j++){
+            getGrayS(fromPicture[i][j],fromPicture[i][j+1]);
+            Res[grayS[0]][grayS[1]]++;
+            Res[grayS[1]][grayS[0]]++;
+        }
     }
-    return dotProduct / (sqrt(normA) * sqrt(normB));
+    //  for(int i=0;i<256;i++){
+    //      for(int j=0;j<256;j++){
+    //          Res[i][j] /= 2*sum;
+    //      }
+    //  }
 }
-int generateSomething()
-{
 
-    int i = 0;
-    for (i = 0; i < GLCM_SIZE * GLCM_SIZE; i++)
-    {
-        int x = i / GLCM_SIZE;
-        int y = i % GLCM_SIZE;
-        contrast += M[x][y] * (x - y) * (x - y);
-        dissimilarity += M[x][y] * abs(x - y);
-        homogeneity += M[x][y] / (1 + (x - y) * (x - y));
-        ASM += M[x][y] * M[x][y];
-        entropy += M[x][y] * log(M[x][y]);
+void generateTexture(int sumElmt , float contrast, float dissimilarity, float homogeneity, float ASM, float entropy, float energy, float* textureComponent){
+    int i, j;
+    for(i = 0 ; i < GLCM_SIZE ; i++){
+        for(j = 0; j < GLCM_SIZE ; j++){
+            //denorm
+            Res [i][j] /= 2*sumElmt;
+            //calculating component
+            contrast += Res[i][j] * (i-j) * (i-j);
+            dissimilarity += Res[i][j] * abs(i-j);
+            homogeneity += Res[i][j] / (1 + (i-j)*(i-j));
+            ASM += Res[i][j] * Res[i][j];
+            entropy += Res[i][j] * log(Res[i][j]);
+        }
     }
     entropy = -entropy;
     energy = sqrt(ASM);
+    textureComponent[0] = contrast;
+    textureComponent[1] = dissimilarity;
+    textureComponent[2] = homogeneity;
+    textureComponent[3] = ASM;
+    textureComponent[4] = entropy;
+    textureComponent[5] = energy;
 
-    int A[COSINE_SIMILARITY_VECTOR_SIZE];
-    int B[COSINE_SIMILARITY_VECTOR_SIZE];
-
-    similarity = cosineSimilarity(A, B, COSINE_SIMILARITY_VECTOR_SIZE);
-
-    return 0;
+    //similarity = cosineSimilarity(A,B,COSINE_SIMILARITY_VECTOR_SIZE);
+    //return 0;
 }
 
-float *getTextureComponents(int ***matrix, int row, int col)
+float *getTextureComponents(int ***fromPicture, int pictHeight, int pictWidth)
 {
     float *textureComponents;
     textureComponents = (float *)malloc(sizeof(float) * COSINE_SIMILARITY_VECTOR_SIZE);
-    textureComponents[0] = 100;
-    textureComponents[1] = 100;
-    textureComponents[2] = 100;
-    textureComponents[3] = 100;
-    textureComponents[4] = 100;
-    textureComponents[5] = 100;
+    toGLCM(fromPicture,pictHeight,pictWidth);
+    generateTexture(pictHeight*(pictWidth-1),0,0,0,0,0,0,textureComponents);
     return textureComponents;
 }
 

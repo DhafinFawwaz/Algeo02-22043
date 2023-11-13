@@ -51,7 +51,16 @@ class Searcher:
             # ambil semua di database
             dataset_list: list[DataSet] = DataSet.objects.all()
 
+            # mempersiapkan parameter
+            SearchReq_matrix = SearchRequest.convert("RGB")
+            SearchReq_matrix = np.array(SearchReq_matrix)
+            Req_row = len(SearchReq_matrix)
+            Req_col = len(SearchReq_matrix[0])
+            ReqC = np.ctypeslib.as_ctypes(SearchReq_matrix)
+            pointer_to_req = cast(ReqC, POINTER(POINTER(POINTER(c_int))))
+
             # hitung texture_component dari data.image_request
+            texture_histogram = ImageProcessing.by_texture.getTextureComponent(pointer_to_req, Req_row, Req_col)
 
             # hitung (multiprocessing) cosine similarity dari texture_components dengan dataset.texture_components
             # kalau > 0.6, append result beserta similaritynya
