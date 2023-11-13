@@ -9,9 +9,9 @@ ImageProcessing.by_color.getColorHistogram.restype = POINTER(c_int)
 ImageProcessing.by_color.free_ptr.argtypes = [POINTER(c_int)]
 
 ImageProcessing.by_texture.getTextureComponents.argtypes = [POINTER(POINTER(POINTER(c_int))), c_int, c_int]
-ImageProcessing.by_texture.getTextureComponents.restype = POINTER(c_float)
-ImageProcessing.by_texture.free_ptr.argtypes = [POINTER(c_float)]
+ImageProcessing.by_texture.getTextureComponents.restype = POINTER(c_double)
+ImageProcessing.by_texture.free_ptr.argtypes = [POINTER(c_double)]
 
-ImageProcessing.by_texture.cosineSimilarity.argtypes = [POINTER(c_int), POINTER(c_int), c_int]
-ImageProcessing.by_texture.cosineSimilarity.restype = c_double
+ImageProcessing.calc_similarity.calcSimilarity.argtypes = [POINTER(c_int), POINTER(c_int), c_int]
+ImageProcessing.calc_similarity.calcSimilarity.restype = c_double
 

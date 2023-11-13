@@ -52,8 +52,9 @@ class Searcher:
             dataset_list: list[DataSet] = DataSet.objects.all()
 
             # mempersiapkan parameter
-            SearchReq_matrix = SearchRequest.convert("RGB")
-            SearchReq_matrix = np.array(SearchReq_matrix)
+            img_inp = Image.open(data.image_request)
+            img_inp_rgb = img_inp.convert("RGB")
+            SearchReq_matrix = np.array(img_inp_rgb)
             Req_row = len(SearchReq_matrix)
             Req_col = len(SearchReq_matrix[0])
             ReqC = np.ctypeslib.as_ctypes(SearchReq_matrix)
@@ -66,7 +67,7 @@ class Searcher:
             # kalau > 0.6, append result beserta similaritynya
             
             # sort result berdasarkan similarity
-
+    
             
             # contoh
             # sr = SearchResult()
