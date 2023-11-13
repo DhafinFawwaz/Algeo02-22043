@@ -13,7 +13,6 @@ ImageProcessing.by_texture.getTextureComponents.argtypes = [POINTER(POINTER(POIN
 ImageProcessing.by_texture.getTextureComponents.restype = POINTER(c_double)
 ImageProcessing.by_texture.free_ptr.argtypes = [POINTER(c_double)]
 
-
-ImageProcessing.cos_sim.cosineSimilarity.argtypes = [POINTER(c_int), POINTER(c_int), c_int]
+ImageProcessing.cos_sim.cosineSimilarity.argtypes = [POINTER(c_double), POINTER(c_double), c_int]
 ImageProcessing.cos_sim.cosineSimilarity.restype = c_double
 
