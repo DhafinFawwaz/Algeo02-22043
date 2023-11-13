@@ -7,7 +7,7 @@
 double Res[GLCM_SIZE][GLCM_SIZE];
 int grayS[2];
 
-void gestGrayS(int* a,int* b){
+void getGrayS(int* a,int* b){
     grayS[0] = round(0.29 * a[0] + 0.587 * a[1] + 0.114 * a[2]);
     grayS[1] = round(0.29 * b[0] + 0.587 * b[1] + 0.114 * b[2]);
 }
