@@ -9,7 +9,7 @@ ImageProcessing.by_color.getColorHistogram.argtypes = [POINTER(c_int), c_int, c_
 ImageProcessing.by_color.getColorHistogram.restype = POINTER(c_int)
 ImageProcessing.by_color.free_ptr.argtypes = [POINTER(c_int)]
 
-ImageProcessing.by_texture.getTextureComponents.argtypes = [POINTER(POINTER(POINTER(c_int))), c_int, c_int]
+ImageProcessing.by_texture.getTextureComponents.argtypes = [POINTER(c_int), c_int, c_int]
 ImageProcessing.by_texture.getTextureComponents.restype = POINTER(c_double)
 ImageProcessing.by_texture.free_ptr.argtypes = [POINTER(c_double)]
 
