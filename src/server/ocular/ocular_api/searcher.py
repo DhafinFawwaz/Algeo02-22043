@@ -44,9 +44,9 @@ class Searcher:
         #     result.append(sr)
 
         # return (result, False)
-
+        print(data.search_type)
         result: list[SearchResult] = []
-        if data.search_type == 0: # by texture
+        if data.search_type == "0": # by texture
             print("Start searching by texture")
             # ambil semua di database
             dataset_list: list[DataSet] = DataSet.objects.all()

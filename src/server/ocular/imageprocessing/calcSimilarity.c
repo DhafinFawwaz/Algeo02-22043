@@ -1,6 +1,6 @@
 #include <math.h>
 
-double cosineSimilarity(int *A, int *B, int vectorSize)
+double cosineSimilarity(double *A, double *B, int vectorSize)
 {
     double dotProduct = 0.0;
     double normA = 0.0;
