@@ -52,21 +52,40 @@ class Searcher:
             dataset_list: list[DataSet] = DataSet.objects.all()
 
             # mempersiapkan parameter
-            SearchReq_matrix = SearchRequest.convert("RGB")
-            SearchReq_matrix = np.array(SearchReq_matrix)
+            img_inp = Image.open(data.image_request)
+            img_inp_rgb = img_inp.convert("RGB")
+            SearchReq_matrix = np.array(img_inp_rgb)
             Req_row = len(SearchReq_matrix)
             Req_col = len(SearchReq_matrix[0])
             ReqC = np.ctypeslib.as_ctypes(SearchReq_matrix)
             pointer_to_req = cast(ReqC, POINTER(POINTER(POINTER(c_int))))
 
             # hitung texture_component dari data.image_request
-            texture_histogram = ImageProcessing.by_texture.getTextureComponent(pointer_to_req, Req_row, Req_col)
-
+            texture_component = ImageProcessing.by_texture.getTextureComponents(pointer_to_req, Req_row, Req_col)
             # hitung (multiprocessing) cosine similarity dari texture_components dengan dataset.texture_components
             # kalau > 0.6, append result beserta similaritynya
+            result: list[SearchResult] = []
+            # datasets = DataSet.objects.all()
+            for dataset in dataset_list:
+                # print(settings.MEDIA_ROOT)
+                # print(settings.PUBLIC_ROOT)
+                sr = SearchResult()
+                sr.image_url = dataset.image_request.url
+                sr.hash = data.hash
+                sr_path = sr.image_url.replace("/", "\\")
+                b_path = settings.BASE_DIR
+                SearchRes_matrix = Image.open(str(b_path) + sr.image_url)
+                SearchRes_matrix = SearchRes_matrix.convert("RGB")
+                SearchRes_matrix = np.array(SearchRes_matrix)
+                Res_row = len(SearchRes_matrix)
+                Res_col = len(SearchRes_matrix[0])
+                ResC = np.ctypeslib.as_ctypes(SearchRes_matrix)
+                pointer_to_res = cast(ResC, POINTER(POINTER(POINTER(c_int))))
+                texture_component_res = ImageProcessing.by_texture.getTextureComponent(pointer_to_res, Res_row, Res_col)
+                if (ImageProcessing.cos_sim.cosineSimilarity(texture_component, color_histogram_res, 72) > 0.6):
+                    result.append(sr)
             
             # sort result berdasarkan similarity
-
             
             # contoh
             # sr = SearchResult()
@@ -93,10 +112,16 @@ class Searcher:
             SearchReq_matrix = np.array(SearchReq_matrix)
             Req_row = len(SearchReq_matrix)
             Req_col = len(SearchReq_matrix[0])
-            ReqC = np.ctypeslib.as_ctypes(SearchReq_matrix)
-            pointer_to_req = cast(ReqC, POINTER(POINTER(POINTER(c_int))))
+            # ReqC = np.ctypeslib.as_ctypes(SearchReq_matrix)
+            # pointer_to_req = cast(ReqC, POINTER(POINTER(POINTER(c_int))))
+            SearchReq_matrix = np.array(SearchReq_matrix, dtype=np.int32)
+            pointer_to_req = SearchReq_matrix.ctypes.data_as(POINTER(c_int))
+            # print("ptr")
+            # print(pointer_to_req)
 
             color_histogram = ImageProcessing.by_color.getColorHistogram(pointer_to_req, Req_row, Req_col)
+            # print("hist")
+            
 
             # hitung (multiprocessing) cosine similarity dari color_histogram dengan dataset.color_histogram
             # kalau > 0.6, append result beserta similaritynya
@@ -115,8 +140,10 @@ class Searcher:
                 SearchRes_matrix = np.array(SearchRes_matrix)
                 Res_row = len(SearchRes_matrix)
                 Res_col = len(SearchRes_matrix[0])
-                ResC = np.ctypeslib.as_ctypes(SearchRes_matrix)
-                pointer_to_res = cast(ResC, POINTER(POINTER(POINTER(c_int))))
+                SearchRes_matrix = np.array(SearchRes_matrix, dtype=np.int32)
+                pointer_to_res = SearchRes_matrix.ctypes.data_as(POINTER(c_int))
+                # ResC = np.ctypeslib.as_ctypes(SearchRes_matrix)
+                # pointer_to_res = cast(ResC, POINTER(POINTER(POINTER(c_int))))
                 color_histogram_res = ImageProcessing.by_color.getColorHistogram(pointer_to_res, Res_row, Res_col)
                 if (ImageProcessing.cos_sim.cosineSimilarity(color_histogram, color_histogram_res, 72) > 0.6):
                     result.append(sr)

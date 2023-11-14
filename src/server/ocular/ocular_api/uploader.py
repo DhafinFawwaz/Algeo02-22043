@@ -28,18 +28,20 @@ class Uploader:
         image = dataset.image_request
         img_tmp = Image.open(image)
         img_matrix = np.array(img_tmp)
-        c_img_matrix = img_matrix.ctypes.data_as(POINTER(POINTER(POINTER(c_int))))
+        img_matrix = np.array(img_matrix, dtype=np.int32)
+        c_img_matrix = img_matrix.ctypes.data_as(POINTER(c_int))
         
         row = len(img_matrix)
         col = len(img_matrix[0])
 
+        c_color_histogram_ptr = ImageProcessing.by_color.getColorHistogram(c_img_matrix, row, col)
+        color_histogram = np.ctypeslib.as_array(c_color_histogram_ptr, shape=(72,))
+        # print(color_histogram)
+        ImageProcessing.by_color.free_ptr(c_color_histogram_ptr)
+
         c_texture_components_ptr = ImageProcessing.by_texture.getTextureComponents(c_img_matrix, row, col)
         texture_components = np.ctypeslib.as_array(c_texture_components_ptr, shape=(6,))
         ImageProcessing.by_texture.free_ptr(c_texture_components_ptr)
-
-        c_color_histogram_ptr = ImageProcessing.by_color.getColorHistogram(c_img_matrix, row, col)
-        color_histogram = np.ctypeslib.as_array(c_color_histogram_ptr, shape=(72,))
-        ImageProcessing.by_color.free_ptr(c_color_histogram_ptr)
 
         dataset.texture_components = texture_components.tolist()
         dataset.color_histogram = color_histogram.tolist()

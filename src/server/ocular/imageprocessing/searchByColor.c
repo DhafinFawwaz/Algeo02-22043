@@ -43,63 +43,93 @@ double getDelta(double r, double g, double b)
 }
 
 // r, g, b NOT normalized
-int getHValue(double r, double g, double b)
+int getHValue(int R, int G, int B)
 {
+    double r = (double)R;
+    double g = (double)G;
+    double b = (double)B;
     double degVal;
     if (getDelta(r, g, b) == 0)
     {
+        // printf("pass1\n");
         degVal = 0;
     }
     else if (getCmaxLoc(r, g, b) == 0)
     {
+
+        // printf("pass2\n");
         degVal = 60 * fmod(((normalizedRGB(g) - normalizedRGB(b)) / getDelta(r, g, b)), 6);
+        // printf("%lfxxx\n", degVal);
+        // printf("%lfkkk\n", getDelta(r, g, b));
     }
     else if (getCmaxLoc(r, g, b) == 1)
     {
-        degVal = 60 * ((normalizedRGB(b) - normalizedRGB(r)) / getDelta(r, g, b)) + 2;
+
+        // printf("pass3\n");
+        degVal = 60 * (((normalizedRGB(b) - normalizedRGB(r)) / getDelta(r, g, b)) + 2);
     }
     else if (getCmaxLoc(r, g, b) == 2)
     {
-        degVal = 60 * ((normalizedRGB(r) - normalizedRGB(g)) / getDelta(r, g, b)) + 4;
+
+        // printf("pass4\n");
+        degVal = 60 * (((normalizedRGB(r) - normalizedRGB(g)) / getDelta(r, g, b)) + 4);
+        // printf("%lfaa\n", getDelta(r, g, b));
+        // printf("%lfaa\n", degVal);
+    }
+
+    if (degVal < 0)
+    {
+        degVal += 360;
     }
 
     if (degVal > 316 && degVal <= 360)
     {
+        // printf("pass\n");
         return 0;
     }
     else if (degVal > 0 && degVal <= 25)
     {
+        // printf("pass\n");
         return 1;
     }
     else if (degVal > 25 && degVal <= 40)
     {
+        // printf("pass\n");
         return 2;
     }
     else if (degVal > 40 && degVal <= 120)
     {
+        // printf("pass\n");
         return 3;
     }
     else if (degVal > 120 && degVal <= 190)
     {
+        // printf("pass\n");
         return 4;
     }
     else if (degVal > 190 && degVal <= 270)
     {
+        // printf("pass\n");
         return 5;
     }
     else if (degVal > 270 && degVal <= 295)
     {
+        // printf("pass\n");
         return 6;
     }
     else if (degVal > 295 && degVal <= 315)
     {
+        // printf("pass\n");
         return 7;
     }
 }
 
 // r, g, b NOT normalized
-int getSValue(double r, double g, double b)
+int getSValue(int R, int G, int B)
 {
+    double r = (double)R;
+    double g = (double)G;
+    double b = (double)B;
     double tempVal;
     if (getCmax(normalizedRGB(r), normalizedRGB(g), normalizedRGB(b)) == 0)
     {
@@ -125,8 +155,11 @@ int getSValue(double r, double g, double b)
 }
 
 // r, g, b NOT normalized
-int getVValue(double r, double g, double b)
+int getVValue(int R, int G, int B)
 {
+    double r = (double)R;
+    double g = (double)G;
+    double b = (double)B;
     double tempVal = getCmax(normalizedRGB(r), normalizedRGB(g), normalizedRGB(b));
 
     if (tempVal >= 0 && tempVal < 0.2)
@@ -144,34 +177,40 @@ int getVValue(double r, double g, double b)
 }
 
 // R, G, B, NOT normalized
-void HSVtoHistElmt(int *Hist, int R, int G, int B)
-{
-    // printf("pass1\n");
-    int H, S, V;
-    H = getHValue(R, G, B);
-    S = getSValue(R, G, B);
-    V = getVValue(R, G, B);
-    // printf("pass2\n");
-    int idx = H * 9 + S * 3 + V;
-    // printf("pass3\n");
-    Hist[idx] += 1;
-    // printf("pass4\n");
-}
+// void HSVtoHistElmt(int *Hist, int R, int G, int B)
+// {
+//     // printf("pass1\n");
+//     int H, S, V;
+//     H = getHValue(R, G, B);
+//     S = getSValue(R, G, B);
+//     V = getVValue(R, G, B);
+//     // printf("pass2\n");
+//     int idx = H * 9 + S * 3 + V;
+//     // printf("pass3\n");
+//     Hist[idx] += 1;
+//     // printf("pass4\n");
+// }
 
-// Ukuran image harus diketahui sebelum menggunakan HSVtoHistArray
-void HSVtoHistArray(int *Hist, int img_matrix_x, int img_matrix_y, int ***img_matrix)
-{
-    for (int i = 0; i < img_matrix_x; i++)
-    {
-        for (int j = 0; j < img_matrix_y; j++)
-        {
-            // printf("pass\n");
-            HSVtoHistElmt(Hist, img_matrix[i][j][0], img_matrix[i][j][1], img_matrix[i][j][2]);
-        }
-    }
-}
+// // Ukuran image harus diketahui sebelum menggunakan HSVtoHistArray
+// void HSVtoHistArray(int *Hist, int img_matrix_x, int img_matrix_y, int ***img_matrix)
+// {
+//     for (int i = 0; i < img_matrix_x; i++)
+//     {
+//         for (int j = 0; j < img_matrix_y; j++)
+//         {
+//             // printf("pass\n");
+//             HSVtoHistElmt(Hist, img_matrix[i][j][0], img_matrix[i][j][1], img_matrix[i][j][2]);
+//         }
+//     }
 
-int *getColorHistogram(int ***matrix, int row, int col)
+//     for (int i = 0; i < HSV_HIST_SIZE; i++)
+//     {
+//         // colorHistogram[i] = 0;
+//         printf("%d ", Hist[i]);
+//     }
+// }
+
+int *getColorHistogram(int *matrix, int row, int col)
 {
     int *colorHistogram;
     colorHistogram = (int *)malloc(sizeof(int) * HSV_HIST_SIZE);
@@ -180,8 +219,40 @@ int *getColorHistogram(int ***matrix, int row, int col)
         colorHistogram[i] = 0;
         // printf("%d ", colorHistogram[i]);
     }
+    // printf("helo hehe\n");
 
-    HSVtoHistArray(colorHistogram, row, col, matrix);
+    int R, G, B;
+    // int AAAA = 0;
+    // HSVtoHistArray(colorHistogram, row, col, matrix);
+    for (int k = 0; k < row; k++)
+    {
+        for (int j = 0; j < col; j++)
+        {
+            R = matrix[k * 32 + j * 3];
+            G = matrix[k * 32 + j * 3 + 1];
+            B = matrix[k * 32 + j * 3 + 2];
+            // printf("%d %d %d\n", R, G, B);
+            // printf("pass\n");
+            // printf("helo haha\n");
+            // printf("helo hahe\n");
+            // printf("pass1\n");
+            int H, S, V;
+            H = getHValue(R, G, B);
+            S = getSValue(R, G, B);
+            V = getVValue(R, G, B);
+            // printf("%d %d %d\n", H, S, V);
+            // printf("pass2\n");
+            int idx = H * 9 + S * 3 + V;
+            // printf("%d---\n", idx);
+            // printf("pass3\n");
+            colorHistogram[idx] += 1;
+            // printf("pass4\n");
+            // AAAA++;
+            // printf("%d\n", AAAA);
+            // break;
+        }
+    }
+
     return colorHistogram;
 }
 
