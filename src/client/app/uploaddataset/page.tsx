@@ -195,7 +195,6 @@ export default function UploadDataset() {
     <main className="pb-16 lg:pt-16 lg:pb-24">
       <div className='flex justify-between px-4 mx-auto max-w-screen-xl'>
         <article className='mx-auto w-full max-w-2xl format format-sm sm:format-base lg:format-lg format-blue dark:format-invert'>
-          
           <h1 className='font-bold text-3xl text-center mb-8'>Upload Dataset</h1>
           {/* Form */}
           
@@ -262,8 +261,10 @@ export default function UploadDataset() {
 
               </label>
 
+              
 
-              <div className='flex flex-col sm:mt-0 mt-4 justify-between'>
+
+              <div className='flex flex-col mt-3 sm:mt-0 justify-between'>
                 
                 {!imageImportList.isPreview ? <div></div> :
                 <div>
@@ -276,17 +277,34 @@ export default function UploadDataset() {
                 </div>
                 }
 
+
+              <ul className="grid grid-cols-2 gap-4 my-4">
+                  <li>
+                      <input type="radio" id="default-radio-0" value={0} name="is_overwrite" className="hidden peer" required defaultChecked/>
+                      <label htmlFor="default-radio-0" className="inline-flex items-center justify-between w-full p-2 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-blue-500 peer-checked:border-blue-600 peer-checked:text-blue-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700">                           
+                          <div className="w-full font-semibold text-center">Accumulative</div>
+                      </label>
+                  </li>
+                  <li>
+                      <input type="radio" id="default-radio-1" value={1} name="is_overwrite" className="hidden peer"/>
+                      <label htmlFor="default-radio-1" className="inline-flex items-center justify-between w-full p-2 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-blue-500 peer-checked:border-blue-600 peer-checked:text-blue-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700">
+                          <div className="w-full font-semibold text-center">Overwrite</div>
+                      </label>
+                  </li>
+              </ul>
+
+
                 {uploadState === 0 ?
                 <> {/**uploadState.toString() === '1' just to remove the error */}
-                  <input disabled={uploadState.toString() === '1'} type="submit" value={"Upload Dataset"} className='h-10 mt-4 w-full cursor-pointer text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700'/>
+                  <input disabled={uploadState.toString() === '1'} type="submit" value={"Upload Dataset"} className='h-10 w-full cursor-pointer text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700'/>
                 </>
                 : uploadState === 2 ?
                 <>
-                  <input type="submit" value={"Done. Upload More?"} className='h-10 mt-4 w-full cursor-pointer text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700'/>
+                  <input type="submit" value={"Done. Upload More?"} className='h-10 w-full cursor-pointer text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700'/>
                 </>
                 :
                 <>
-                  <div className='cursor-not-allowed flex justify-center h-10 gap-2 mt-4 w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700'>
+                  <div className='cursor-not-allowed flex justify-center h-10 gap-2 w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700'>
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2"><path strokeDasharray="60" strokeDashoffset="60" strokeOpacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path strokeDasharray="15" strokeDashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg>
                     <div className=''>Uploading...</div>
                   </div>
