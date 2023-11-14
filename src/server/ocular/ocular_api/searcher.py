@@ -109,12 +109,12 @@ class Searcher:
             # hitung color_histogram dari data.image_request
             SearchReq_matrix = Image.open(data.image_request)
             SearchReq_matrix = SearchReq_matrix.convert("RGB")
-            SearchReq_matrix = np.array(SearchReq_matrix)
+            SearchReq_matrix = np.array(SearchReq_matrix, dtype=np.int32)
             Req_row = len(SearchReq_matrix)
             Req_col = len(SearchReq_matrix[0])
             # ReqC = np.ctypeslib.as_ctypes(SearchReq_matrix)
             # pointer_to_req = cast(ReqC, POINTER(POINTER(POINTER(c_int))))
-            SearchReq_matrix = np.array(SearchReq_matrix, dtype=np.int32)
+            
             pointer_to_req = SearchReq_matrix.ctypes.data_as(POINTER(c_int))
             # print("ptr")
             # print(pointer_to_req)
@@ -130,22 +130,26 @@ class Searcher:
             for dataset in dataset_list:
                 # print(settings.MEDIA_ROOT)
                 # print(settings.PUBLIC_ROOT)
+
                 sr = SearchResult()
-                sr.image_url = dataset.image_request.url
-                sr.hash = data.hash
-                sr_path = sr.image_url.replace("/", "\\")
-                b_path = settings.BASE_DIR
-                SearchRes_matrix = Image.open(str(b_path) + sr.image_url)
-                SearchRes_matrix = SearchRes_matrix.convert("RGB")
-                SearchRes_matrix = np.array(SearchRes_matrix)
-                Res_row = len(SearchRes_matrix)
-                Res_col = len(SearchRes_matrix[0])
-                SearchRes_matrix = np.array(SearchRes_matrix, dtype=np.int32)
-                pointer_to_res = SearchRes_matrix.ctypes.data_as(POINTER(c_int))
+                # sr.image_url = dataset.image_request.url
+                # sr.hash = data.hash.convert("RGB")
+                # sr_path = sr.image_url.replace("/", "\\")
+                # b_path = settings.BASE_DIR
+                # SearchRes_matrix = Image.open(str(b_path) + sr.image_url)
+                # SearchRes_matrix = SearchRes_matrix
+                # SearchRes_matrix = np.array(SearchRes_matrix)
+                # Res_row = len(SearchRes_matrix)
+                # Res_col = len(SearchRes_matrix[0])
+                # SearchRes_matrix = np.array(SearchRes_matrix, dtype=np.int32)
+                # pointer_to_res = SearchRes_matrix.ctypes.data_as(POINTER(c_int))
+
                 # ResC = np.ctypeslib.as_ctypes(SearchRes_matrix)
                 # pointer_to_res = cast(ResC, POINTER(POINTER(POINTER(c_int))))
-                color_histogram_res = ImageProcessing.by_color.getColorHistogram(pointer_to_res, Res_row, Res_col)
-                if (ImageProcessing.cos_sim.cosineSimilarityColor(color_histogram, color_histogram_res, 72) > 0.6):
+                color_histogram_res = dataset.color_histogram
+                # ImageProcessing.by_color.getColorHistogram(pointer_to_res, Res_row, Res_col)
+                sr.similarity = ImageProcessing.cos_sim.cosineSimilarityColor(color_histogram, color_histogram_res, 72)
+                if (sr.similarity > 0.6):
                     result.append(sr)
             
             # sort result berdasarkan similarity

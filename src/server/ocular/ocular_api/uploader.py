@@ -27,7 +27,7 @@ class Uploader:
         
         image = dataset.image_request
         img_tmp = Image.open(image)
-        img_matrix = np.array(img_tmp)
+        img_matrix = img_tmp.convert('RGB')
         img_matrix = np.array(img_matrix, dtype=np.int32)
         c_img_matrix = img_matrix.ctypes.data_as(POINTER(c_int))
         
