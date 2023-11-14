@@ -36,7 +36,7 @@ class Uploader:
 
         c_color_histogram_ptr = ImageProcessing.by_color.getColorHistogram(c_img_matrix, row, col)
         color_histogram = np.ctypeslib.as_array(c_color_histogram_ptr, shape=(72,))
-        # print(color_histogram)
+        print("hahaha")
         ImageProcessing.by_color.free_ptr(c_color_histogram_ptr)
 
         c_texture_components_ptr = ImageProcessing.by_texture.getTextureComponents(c_img_matrix, row, col)

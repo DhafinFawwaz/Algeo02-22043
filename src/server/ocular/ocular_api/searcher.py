@@ -145,7 +145,7 @@ class Searcher:
                 # ResC = np.ctypeslib.as_ctypes(SearchRes_matrix)
                 # pointer_to_res = cast(ResC, POINTER(POINTER(POINTER(c_int))))
                 color_histogram_res = ImageProcessing.by_color.getColorHistogram(pointer_to_res, Res_row, Res_col)
-                if (ImageProcessing.cos_sim.cosineSimilarity(color_histogram, color_histogram_res, 72) > 0.6):
+                if (ImageProcessing.cos_sim.cosineSimilarityColor(color_histogram, color_histogram_res, 72) > 0.6):
                     result.append(sr)
             
             # sort result berdasarkan similarity
