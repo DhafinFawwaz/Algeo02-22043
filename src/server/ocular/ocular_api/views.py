@@ -36,13 +36,28 @@ class SearchRequestApiView(APIView):
         image_request_data.seek(0) # reset cursor. prevent error invalid_image becase of generateHash
 
         (search_result_list,is_hash_exist) = Searcher.getSearchResult(search_request)
+
+        if len(search_result_list) == 0:
+            return Response({
+                'data': [],
+                'pdf_url': ""
+            }, status=status.HTTP_404_NOT_FOUND)
         
         if not is_hash_exist:
             print("Saving search request and results")
+            start = time()
             SearchResult.objects.bulk_create(search_result_list)
-            
-            search_request.pdf_result = Searcher.getPDFfromImageUrls(search_result_list)
+
+            print("Saving search result took", time()-start, "seconds")
+
             search_request.save()
+            
+            print("Saving PDF")
+            start = time()
+            # search_request.pdf_result = Searcher.getPDFfromImageUrls(search_result_list)
+            print("Saving PDF took", time()-start, "seconds")
+
+            # search_request.save()
         else:
             print("Return cached search result")
         
@@ -52,6 +67,7 @@ class SearchRequestApiView(APIView):
             'data': serialized_data,
             'pdf_url': "/media/result/"+search_request.hash+".pdf"
         }
+
         return Response(response, status=status.HTTP_201_CREATED)
     
 
@@ -92,13 +108,24 @@ class UploadDatasetApiView(APIView):
     
     
     def post(self, request, *args, **kwargs):
-        
+
+        is_overwrite = int(request.data.get('is_overwrite'))
+        if is_overwrite:
+            print("Overwriting dataset")
+            start = time()
+            DataSet.objects.all().delete()
+            print("Deleting all dataset took", time()-start, "seconds")
+        else:
+            print("Appending dataset")
+
         image_list = request.data.getlist('images')
         if image_list[0] == '': # can happen because of the way FormData works
             image_list.pop(0)
 
         # Delete semua SearchResult
+        start = time()
         SearchResult.objects.all().delete()
+        print("Deleting all search result took", time()-start, "seconds")
 
         start = time()
         Uploader.saveImages(image_list)

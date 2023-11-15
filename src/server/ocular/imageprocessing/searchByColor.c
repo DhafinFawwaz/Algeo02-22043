@@ -5,7 +5,7 @@
 
 double normalizedRGB(double n)
 {
-    return (n / 255);
+    return (n / 255.0);
 }
 
 // r, g, b normalized
@@ -82,7 +82,7 @@ int getHValue(int R, int G, int B)
         degVal += 360;
     }
 
-    if (degVal > 316 && degVal <= 360)
+    if ((degVal > 315 && degVal <= 360) || degVal == 0)
     {
         // printf("pass\n");
         return 0;
@@ -122,6 +122,11 @@ int getHValue(int R, int G, int B)
         // printf("pass\n");
         return 7;
     }
+    else
+    {
+        printf("%lf\n", degVal);
+        printf("Hgagal\n");
+    }
 }
 
 // r, g, b NOT normalized
@@ -152,6 +157,10 @@ int getSValue(int R, int G, int B)
     {
         return 2;
     }
+    else
+    {
+        printf("Sgagal\n");
+    }
 }
 
 // r, g, b NOT normalized
@@ -161,6 +170,7 @@ int getVValue(int R, int G, int B)
     double g = (double)G;
     double b = (double)B;
     double tempVal = getCmax(normalizedRGB(r), normalizedRGB(g), normalizedRGB(b));
+
 
     if (tempVal >= 0 && tempVal < 0.2)
     {
@@ -173,6 +183,19 @@ int getVValue(int R, int G, int B)
     else if (tempVal >= 0.7 && tempVal <= 1)
     {
         return 2;
+    }
+    else
+    {
+        printf("[%lf", r);
+        printf(", %lf", g);
+        printf(", %lf]\n", b);
+
+        printf("[%d", R);
+        printf(", %d", G);
+        printf(", %d]\n", B);
+
+        printf("%lf\n", tempVal);
+        printf("Vgagal\n");
     }
 }
 
@@ -213,7 +236,11 @@ int getVValue(int R, int G, int B)
 int *getColorHistogram(int *matrix, int row, int col)
 {
     int *colorHistogram;
-    colorHistogram = (int *)malloc(sizeof(int) * HSV_HIST_SIZE);
+    colorHistogram = (int *)malloc(sizeof(int) * HSV_HIST_SIZE + 5);
+    if (colorHistogram == NULL)
+    {
+        printf("gagal maloc\n");
+    }
     for (int i = 0; i < HSV_HIST_SIZE; i++)
     {
         colorHistogram[i] = 0;
@@ -228,9 +255,9 @@ int *getColorHistogram(int *matrix, int row, int col)
     {
         for (int j = 0; j < col; j++)
         {
-            R = matrix[k * 32 + j * 3];
-            G = matrix[k * 32 + j * 3 + 1];
-            B = matrix[k * 32 + j * 3 + 2];
+            R = matrix[k *col* 3 + j * 3];
+            G = matrix[k *col* 3 + j * 3 + 1];
+            B = matrix[k *col* 3 + j * 3 + 2];
             // printf("%d %d %d\n", R, G, B);
             // printf("pass\n");
             // printf("helo haha\n");
@@ -252,6 +279,11 @@ int *getColorHistogram(int *matrix, int row, int col)
             // break;
         }
     }
+
+    // for (int o = 0; o < 72; o++)
+    // {
+    //     printf("%d ", colorHistogram[o]);
+    // }
 
     return colorHistogram;
 }

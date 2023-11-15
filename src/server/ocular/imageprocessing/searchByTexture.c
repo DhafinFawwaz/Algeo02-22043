@@ -6,20 +6,24 @@
 
 double Res[GLCM_SIZE][GLCM_SIZE];
 
-int getGrayS(int r,int g, int b){
+int getGrayS(int r, int g, int b)
+{
     return (round(0.29 * r + 0.587 * g + 0.114 * b));
 }
 
-void toGLCM(int* fromPicture, int height, int width){
-    int cidx1,cidx2, val1, val2;
-    for(int i=0;i<height;i++){
-        for(int j=0;j<width-1;j++){
-            cidx1 = i*width*3+j*3;
-            cidx2 = i*width*3+(j+1)*3;
-            val1 = getGrayS(fromPicture[cidx1],fromPicture[cidx1+1],fromPicture[cidx1+2]);
-            val2 = getGrayS(fromPicture[cidx2],fromPicture[cidx2+1],fromPicture[cidx2+2]);
-            Res[val1][val2]+=1;
-            Res[val2][val1]+=1;
+void toGLCM(int *fromPicture, int height, int width)
+{
+    int cidx1, cidx2, val1, val2;
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width - 1; j++)
+        {
+            cidx1 = i * width * 3 + j * 3;
+            cidx2 = i * width * 3 + (j + 1) * 3;
+            val1 = getGrayS(fromPicture[cidx1], fromPicture[cidx1 + 1], fromPicture[cidx1 + 2]);
+            val2 = getGrayS(fromPicture[cidx2], fromPicture[cidx2 + 1], fromPicture[cidx2 + 2]);
+            Res[val1][val2] += 1;
+            Res[val2][val1] += 1;
         }
     }
 }
@@ -36,7 +40,8 @@ void generateTexture(int sumElmt , double contrast, double dissimilarity, double
             dissimilarity += Res[i][j] * abs(i-j);
             homogeneity += Res[i][j] / (1 + (i-j)*(i-j));
             ASM += Res[i][j] * Res[i][j];
-            if(Res[i][j] != 0) entropy += Res[i][j] * log(Res[i][j]);
+            if (Res[i][j] != 0)
+                entropy += Res[i][j] * log(Res[i][j]);
         }
     }
     entropy = -entropy;
@@ -54,8 +59,8 @@ void generateTexture(int sumElmt , double contrast, double dissimilarity, double
     forDenorm = (pictHeight)*(pictWidth-1);
     textureComponent[5] = energy / forDenorm;
 
-    //similarity = cosineSimilarity(A,B,COSINE_SIMILARITY_VECTOR_SIZE);
-    //return 0;
+    // similarity = cosineSimilarity(A,B,COSINE_SIMILARITY_VECTOR_SIZE);
+    // return 0;
 }
 
 double *getTextureComponents(int *fromPicture, int pictHeight, int pictWidth)

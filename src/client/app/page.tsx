@@ -1,6 +1,6 @@
 'use client';
 import Image from 'next/image'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LoadingSkeleton } from '../component/loadingskeleton';
 import Link from 'next/link';
 
@@ -102,7 +102,7 @@ export default function Home() {
 
   // #region Pagination ================================
   function changePage(newPage: number){
-    if(newPage < 0 || newPage > imageResult.srcList.length/imageResult.maxImagePerPage) return;
+    if(newPage < 0 || newPage >= imageResult.srcList.length/imageResult.maxImagePerPage) return;
     setImageResult(
       {
         srcList: imageResult.srcList,
@@ -142,7 +142,7 @@ export default function Home() {
       // first, ..., 3rd last, current, last
       // first, ..., current, 2nd last, last
       const minPage: number = 0;
-      const maxPage: number = Math.floor(imageResult.srcList.length/imageResult.maxImagePerPage);
+      const maxPage: number = Math.ceil(imageResult.srcList.length/imageResult.maxImagePerPage)-1;
       buttonList.push(getPaginationButton(imageResult.page)); // current
       if(imageResult.page-1 >= minPage) buttonList.unshift(getPaginationButton(imageResult.page-1)); // left
       if(imageResult.page+1 <= maxPage) buttonList.push(getPaginationButton(imageResult.page+1)); // right
@@ -165,6 +165,28 @@ export default function Home() {
       
   }
   // #endregion Pagination End ================================
+
+
+  const loopWaitDuration = 5000;
+  useEffect(() => {
+    const interval = setInterval(() => {
+      console.log('Logs every minute');
+      
+    }, loopWaitDuration);
+  
+    return () => clearInterval(interval);
+  }, [])
+  const [isAutoCapture, setIsAutoCapture] = useState<boolean>(false);
+  function onEnableAutoCapture(e: any){
+    setIsAutoCapture(!isAutoCapture);
+
+    // wait for 5 seconds
+
+    // fetch to server
+    // if it returns not human face, then wait another 5 seconds again
+    // else 
+    // just start searching
+  }
 
 
   return (
@@ -272,6 +294,15 @@ export default function Home() {
                 }
 
                 <div>
+
+                  <div className='flex items-center mb-1'>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input onChange={onEnableAutoCapture} type="checkbox" value="" checked={isAutoCapture} className="sr-only peer"/>
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                    </label>
+                    <span className="mx-2 font-medium text-gray-900 dark:text-white">Auto Capture</span>
+                  </div>
+                  
                   <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">Search Algorithm:</h3>
                   <ul className="grid grid-cols-2 gap-4 mb-4">
                       <li>
