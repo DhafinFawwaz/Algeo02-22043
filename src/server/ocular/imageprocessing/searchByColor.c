@@ -171,6 +171,7 @@ int getVValue(int R, int G, int B)
     double b = (double)B;
     double tempVal = getCmax(normalizedRGB(r), normalizedRGB(g), normalizedRGB(b));
 
+
     if (tempVal >= 0 && tempVal < 0.2)
     {
         return 0;
@@ -185,6 +186,15 @@ int getVValue(int R, int G, int B)
     }
     else
     {
+        printf("[%lf", r);
+        printf(", %lf", g);
+        printf(", %lf]\n", b);
+
+        printf("[%d", R);
+        printf(", %d", G);
+        printf(", %d]\n", B);
+
+        printf("%lf\n", tempVal);
         printf("Vgagal\n");
     }
 }
@@ -245,9 +255,9 @@ int *getColorHistogram(int *matrix, int row, int col)
     {
         for (int j = 0; j < col; j++)
         {
-            R = matrix[k * 32 + j * 3];
-            G = matrix[k * 32 + j * 3 + 1];
-            B = matrix[k * 32 + j * 3 + 2];
+            R = matrix[k *col* 3 + j * 3];
+            G = matrix[k *col* 3 + j * 3 + 1];
+            B = matrix[k *col* 3 + j * 3 + 2];
             // printf("%d %d %d\n", R, G, B);
             // printf("pass\n");
             // printf("helo haha\n");

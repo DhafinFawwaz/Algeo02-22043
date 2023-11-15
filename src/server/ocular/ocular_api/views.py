@@ -52,7 +52,11 @@ class SearchRequestApiView(APIView):
 
             search_request.save()
             
+            print("Saving PDF")
+            start = time()
             # search_request.pdf_result = Searcher.getPDFfromImageUrls(search_result_list)
+            print("Saving PDF took", time()-start, "seconds")
+
             # search_request.save()
         else:
             print("Return cached search result")
