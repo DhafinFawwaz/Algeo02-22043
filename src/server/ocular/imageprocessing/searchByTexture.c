@@ -24,8 +24,9 @@ void toGLCM(int* fromPicture, int height, int width){
     }
 }
 
-void generateTexture(int sumElmt , double contrast, double dissimilarity, double homogeneity, double ASM, double entropy, double energy, double* textureComponent){
+void generateTexture(int sumElmt , double contrast, double dissimilarity, double homogeneity, double ASM, double entropy, double energy, double* textureComponent, int pictHeight, int pictWidth){
     int i, j;
+    double forDenorm;
     for(i = 0 ; i < GLCM_SIZE ; i++){
         for(j = 0; j < GLCM_SIZE ; j++){
             //denorm
@@ -40,12 +41,18 @@ void generateTexture(int sumElmt , double contrast, double dissimilarity, double
     }
     entropy = -entropy;
     energy = sqrt(ASM);
-    textureComponent[0] = contrast;
-    textureComponent[1] = dissimilarity;
-    textureComponent[2] = homogeneity;
-    textureComponent[3] = ASM;
-    textureComponent[4] = entropy;
-    textureComponent[5] = energy;
+    forDenorm = 255*255*(pictHeight)*(pictWidth-1);
+    textureComponent[0] = contrast / forDenorm;
+    forDenorm = 255*(pictHeight)*(pictWidth-1);
+    textureComponent[1] = dissimilarity / forDenorm;
+    forDenorm = (pictHeight)*(pictWidth-1);
+    textureComponent[2] = homogeneity / forDenorm;
+    forDenorm *= forDenorm;
+    textureComponent[3] = ASM / forDenorm;
+    forDenorm = (pictHeight)*(pictWidth-1) * log((pictHeight)*(pictWidth-1));
+    textureComponent[4] = entropy / forDenorm;
+    forDenorm = (pictHeight)*(pictWidth-1);
+    textureComponent[5] = energy / forDenorm;
 
     //similarity = cosineSimilarity(A,B,COSINE_SIMILARITY_VECTOR_SIZE);
     //return 0;
@@ -56,7 +63,7 @@ double *getTextureComponents(int *fromPicture, int pictHeight, int pictWidth)
     double *textureComponents;
     textureComponents = (double *)malloc(sizeof(double) * COSINE_SIMILARITY_VECTOR_SIZE);
     toGLCM(fromPicture,pictHeight,pictWidth);
-    generateTexture(pictHeight*(pictWidth-1),0,0,0,0,0,0,textureComponents);
+    generateTexture(pictHeight*(pictWidth-1),0,0,0,0,0,0,textureComponents,pictHeight,pictWidth);
     return textureComponents;
 }
 
