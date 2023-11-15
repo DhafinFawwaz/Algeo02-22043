@@ -14,7 +14,7 @@ import img2pdf
 import tempfile
 from django.core.files.base import ContentFile
 from .apps import ImageProcessing
-from ctypes import cast, POINTER, c_int
+from ctypes import cast, POINTER, c_int, c_double
 
 class Searcher:
     def generateHash(image_file: InMemoryUploadedFile, search_type: str) -> str:
@@ -67,8 +67,8 @@ class Searcher:
                 # print(settings.MEDIA_ROOT)
                 # print(settings.PUBLIC_ROOT)
                 sr = SearchResult()
-                # sr.image_url = dataset.image_request.url
-                # sr.hash = data.hash
+                sr.image_url = dataset.image_request.url
+                sr.hash = data.hash
                 # sr_path = sr.image_url.replace("/", "\\")
                 # b_path = settings.BASE_DIR
                 # SearchRes_matrix = Image.open(str(b_path) + sr.image_url)
@@ -78,7 +78,9 @@ class Searcher:
                 # SearchRes_matrix = np.array(SearchRes_matrix, dtype=np.int32)
                 # pointer_to_res = SearchRes_matrix.ctypes.data_as(POINTER(c_int))
                 texture_component_res = dataset.texture_components
-                sr.similarity = ImageProcessing.cos_sim.cosineSimilarity(texture_component, texture_component_res, 72)
+                texture_component_res_v2 = np.array(texture_component_res, dtype=np.double)
+                texture_component_res_c = texture_component_res_v2.ctypes.data_as(POINTER(c_double))
+                sr.similarity = ImageProcessing.cos_sim.cosineSimilarity(texture_component, texture_component_res_c, 6)
                 if(sr.similarity > 0.6):
                     result.append(sr)
             
@@ -129,25 +131,20 @@ class Searcher:
                 # print(settings.PUBLIC_ROOT)
 
                 sr = SearchResult()
-                # sr.image_url = dataset.image_request.url
-                # sr.hash = data.hash.convert("RGB")
-                # sr_path = sr.image_url.replace("/", "\\")
-                # b_path = settings.BASE_DIR
-                # SearchRes_matrix = Image.open(str(b_path) + sr.image_url)
-                # SearchRes_matrix = SearchRes_matrix
-                # SearchRes_matrix = np.array(SearchRes_matrix)
-                # Res_row = len(SearchRes_matrix)
-                # Res_col = len(SearchRes_matrix[0])
-                # SearchRes_matrix = np.array(SearchRes_matrix, dtype=np.int32)
-                # pointer_to_res = SearchRes_matrix.ctypes.data_as(POINTER(c_int))
+                sr.image_url = dataset.image_request.url
+                sr.hash = data.hash
 
                 # ResC = np.ctypeslib.as_ctypes(SearchRes_matrix)
                 # pointer_to_res = cast(ResC, POINTER(POINTER(POINTER(c_int))))
                 color_histogram_res = dataset.color_histogram
+                color_histogram_res_v2 = np.array(color_histogram_res, dtype=np.int32)
+                color_histogram_res_c = color_histogram_res_v2.ctypes.data_as(POINTER(c_int))
                 # ImageProcessing.by_color.getColorHistogram(pointer_to_res, Res_row, Res_col)
-                sr.similarity = ImageProcessing.cos_sim.cosineSimilarityColor(color_histogram, color_histogram_res, 72)
+                sr.similarity = ImageProcessing.cos_sim.cosineSimilarityColor(color_histogram, color_histogram_res_c, 72)
                 if (sr.similarity > 0.6):
                     result.append(sr)
+
+            
             
             # sort result berdasarkan similarity
             return (result, False)
@@ -195,6 +192,7 @@ class Searcher:
             image_path: str = search_result.image_url.replace('/','\\')
             base_path = settings.BASE_DIR
             full_path: str = str(base_path)+image_path
+            print(full_path)
             img = Image.open(full_path)
             images.append(img)
 

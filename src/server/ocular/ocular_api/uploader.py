@@ -34,14 +34,21 @@ class Uploader:
         row = len(img_matrix)
         col = len(img_matrix[0])
 
+        print("hihi2")
+        c_texture_components_ptr = ImageProcessing.by_texture.getTextureComponents(c_img_matrix, row, col)
+        print("hoho2")
+        texture_components = np.ctypeslib.as_array(c_texture_components_ptr, shape=(6,))
+        print("hahaha2")
+        print(texture_components)
+        # ImageProcessing.by_texture.free_ptr(c_texture_components_ptr)
+
+        print("hihi")
         c_color_histogram_ptr = ImageProcessing.by_color.getColorHistogram(c_img_matrix, row, col)
+        print("hoho")
         color_histogram = np.ctypeslib.as_array(c_color_histogram_ptr, shape=(72,))
         print("hahaha")
-        ImageProcessing.by_color.free_ptr(c_color_histogram_ptr)
-
-        c_texture_components_ptr = ImageProcessing.by_texture.getTextureComponents(c_img_matrix, row, col)
-        texture_components = np.ctypeslib.as_array(c_texture_components_ptr, shape=(6,))
-        ImageProcessing.by_texture.free_ptr(c_texture_components_ptr)
+        print(color_histogram)
+        # ImageProcessing.by_color.free_ptr(c_color_histogram_ptr)
 
         dataset.texture_components = texture_components.tolist()
         dataset.color_histogram = color_histogram.tolist()
@@ -71,10 +78,12 @@ class Uploader:
             data_list.append(new_data)
         # Bulk create all DataSet objects at once
         DataSet.objects.bulk_create(data_list)
-        with Pool(cpu_count) as pool:
-            pool.map_async(Uploader.task_multiprocess, [data.pk for data in data_list])
-            pool.close()
-            pool.join()
+        # with Pool(cpu_count) as pool:
+        #     pool.map_async(Uploader.task_multiprocess, [data.pk for data in data_list])
+        #     pool.close()
+        #     pool.join()
+        for data in data_list:
+            tmp = Uploader.task_multiprocess(data.pk)
 
         # ====================== Normal ======================
         # for i in range(0, length):
