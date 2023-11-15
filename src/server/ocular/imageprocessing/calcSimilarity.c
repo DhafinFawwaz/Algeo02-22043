@@ -23,9 +23,9 @@ double cosineSimilarityColor(int *A, int *B, int vectorSize)
     int i = 0;
     for (i = 0; i < vectorSize; i++)
     {
-        dotProduct += A[i] * B[i];
-        normA += A[i] * A[i];
-        normB += B[i] * B[i];
+        dotProduct += (double)A[i] * (double)B[i];
+        normA += (double)A[i] * (double)A[i];
+        normB += (double)B[i] * (double)B[i];
     }
     return dotProduct / (sqrt(normA) * sqrt(normB));
 }

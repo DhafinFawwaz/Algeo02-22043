@@ -45,10 +45,13 @@ class SearchRequestApiView(APIView):
         
         if not is_hash_exist:
             print("Saving search request and results")
+            start = time()
             SearchResult.objects.bulk_create(search_result_list)
+
+            print("Saving search result took", time()-start, "seconds")
             
-            search_request.pdf_result = Searcher.getPDFfromImageUrls(search_result_list)
-            search_request.save()
+            # search_request.pdf_result = Searcher.getPDFfromImageUrls(search_result_list)
+            # search_request.save()
         else:
             print("Return cached search result")
         
@@ -58,6 +61,7 @@ class SearchRequestApiView(APIView):
             'data': serialized_data,
             'pdf_url': "/media/result/"+search_request.hash+".pdf"
         }
+
         return Response(response, status=status.HTTP_201_CREATED)
     
 

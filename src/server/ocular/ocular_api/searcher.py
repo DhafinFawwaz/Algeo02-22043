@@ -16,6 +16,8 @@ from django.core.files.base import ContentFile
 from .apps import ImageProcessing
 from ctypes import cast, POINTER, c_int, c_double
 
+from math import isnan, isinf
+
 class Searcher:
     def generateHash(image_file: InMemoryUploadedFile, search_type: str) -> str:
         image_content = image_file.read()
@@ -69,14 +71,7 @@ class Searcher:
                 sr = SearchResult()
                 sr.image_url = dataset.image_request.url
                 sr.hash = data.hash
-                # sr_path = sr.image_url.replace("/", "\\")
-                # b_path = settings.BASE_DIR
-                # SearchRes_matrix = Image.open(str(b_path) + sr.image_url)
-                # SearchRes_matrix = SearchRes_matrix.convert("RGB")
-                # Res_row = len(SearchRes_matrix)
-                # Res_col = len(SearchRes_matrix[0])
-                # SearchRes_matrix = np.array(SearchRes_matrix, dtype=np.int32)
-                # pointer_to_res = SearchRes_matrix.ctypes.data_as(POINTER(c_int))
+                
                 texture_component_res = dataset.texture_components
                 texture_component_res_v2 = np.array(texture_component_res, dtype=np.double)
                 texture_component_res_c = texture_component_res_v2.ctypes.data_as(POINTER(c_double))
@@ -96,6 +91,7 @@ class Searcher:
             # result.append(sr)
 
 
+            result.sort(key=lambda x: x.similarity)
             return (result,False)
         else: # by color
             print("Start searching by color")
@@ -118,7 +114,7 @@ class Searcher:
             # print("ptr")
             # print(pointer_to_req)
 
-            color_histogram = ImageProcessing.by_color.getColorHistogram(pointer_to_req, Req_row, Req_col)
+            color_histogram_c = ImageProcessing.by_color.getColorHistogram(pointer_to_req, Req_row, Req_col)
             # print("hist")
             
 
@@ -127,8 +123,6 @@ class Searcher:
             result: list[SearchResult] = []
             # datasets = DataSet.objects.all()
             for dataset in dataset_list:
-                # print(settings.MEDIA_ROOT)
-                # print(settings.PUBLIC_ROOT)
 
                 sr = SearchResult()
                 sr.image_url = dataset.image_request.url
@@ -140,13 +134,55 @@ class Searcher:
                 color_histogram_res_v2 = np.array(color_histogram_res, dtype=np.int32)
                 color_histogram_res_c = color_histogram_res_v2.ctypes.data_as(POINTER(c_int))
                 # ImageProcessing.by_color.getColorHistogram(pointer_to_res, Res_row, Res_col)
-                sr.similarity = ImageProcessing.cos_sim.cosineSimilarityColor(color_histogram, color_histogram_res_c, 72)
+                similarity = ImageProcessing.cos_sim.cosineSimilarityColor(color_histogram_c, color_histogram_res_c, 72)
+                
+                if(isnan(similarity)):
+                    print(sr.image_url, end=", ")
+                    print("nan woi")
+
+                    print(sum(color_histogram_res_v2))
+                    print(color_histogram_res_v2)
+
+                    color_histogram_req = np.ctypeslib.as_array(color_histogram_c, shape=(72,))
+                    print(sum(color_histogram_req))
+                    print(color_histogram_req)
+
+                    continue
+                if(isinf(similarity)):
+                    print(sr.image_url, end=", ")
+                    print("infinity woi")
+
+                    print(sum(color_histogram_res_v2))
+                    print(color_histogram_res_v2)
+                    
+                    color_histogram_req = np.ctypeslib.as_array(color_histogram_c, shape=(72,))
+                    print(sum(color_histogram_req))
+                    print(color_histogram_req)
+
+                    continue
+
+                if(similarity > 1):
+                    print(sr.image_url, end=", ")
+                    print("kok lebih woi")
+
+                    print(sum(color_histogram_res_v2))
+                    print(color_histogram_res_v2)
+                    
+                    color_histogram_req = np.ctypeslib.as_array(color_histogram_c, shape=(72,))
+                    print(sum(color_histogram_req))
+                    print(color_histogram_req)
+
+                    continue
+                
+
+                sr.similarity = similarity
+                
                 if (sr.similarity > 0.6):
                     result.append(sr)
 
             
-            
             # sort result berdasarkan similarity
+            result.sort(key=lambda x: x.similarity, reverse=True)
             return (result, False)
 
         images_path = Path(settings.MEDIA_ROOT).glob('*.*')
@@ -192,7 +228,6 @@ class Searcher:
             image_path: str = search_result.image_url.replace('/','\\')
             base_path = settings.BASE_DIR
             full_path: str = str(base_path)+image_path
-            print(full_path)
             img = Image.open(full_path)
             images.append(img)
 
