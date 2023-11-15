@@ -19,6 +19,8 @@ from concurrent.futures import ThreadPoolExecutor
 import re
 import urllib3
 from datetime import datetime
+from django.db import transaction
+from time import time
 
 class Uploader:
 
@@ -34,25 +36,27 @@ class Uploader:
         row = len(img_matrix)
         col = len(img_matrix[0])
 
-        print("hihi2")
+        # Debug
+        # start_time = time()
+        # Debug End
+
         c_texture_components_ptr = ImageProcessing.by_texture.getTextureComponents(c_img_matrix, row, col)
-        print("hoho2")
         texture_components = np.ctypeslib.as_array(c_texture_components_ptr, shape=(6,))
-        print("hahaha2")
-        print(texture_components)
         # ImageProcessing.by_texture.free_ptr(c_texture_components_ptr)
 
-        print("hihi")
         c_color_histogram_ptr = ImageProcessing.by_color.getColorHistogram(c_img_matrix, row, col)
-        print("hoho")
         color_histogram = np.ctypeslib.as_array(c_color_histogram_ptr, shape=(72,))
-        print("hahaha")
-        print(color_histogram)
         # ImageProcessing.by_color.free_ptr(c_color_histogram_ptr)
 
         dataset.texture_components = texture_components.tolist()
         dataset.color_histogram = color_histogram.tolist()
-        dataset.save()
+        dataset.save(update_fields=['texture_components', 'color_histogram'])
+        # DataSet.objects.update(pk=pk, texture_components=texture_components.tolist(), color_histogram=color_histogram.tolist())
+
+        # Debug
+        # print("Time taken for image {} is {} seconds".format(pk, time()-start_time))
+        # Debug End
+
         return dataset
      
     def saveImages(image_list: list[InMemoryUploadedFile]):
@@ -77,13 +81,17 @@ class Uploader:
             new_data = DataSet(image_request=image_list[i])
             data_list.append(new_data)
         # Bulk create all DataSet objects at once
-        DataSet.objects.bulk_create(data_list)
-        # with Pool(cpu_count) as pool:
-        #     pool.map_async(Uploader.task_multiprocess, [data.pk for data in data_list])
-        #     pool.close()
-        #     pool.join()
-        for data in data_list:
-            tmp = Uploader.task_multiprocess(data.pk)
+        start = time()
+        with transaction.atomic():
+            DataSet.objects.bulk_create(data_list)
+        print("Bulk create took", time()-start, "seconds")
+
+        with Pool(cpu_count) as pool:
+            pool.map_async(Uploader.task_multiprocess, [data.pk for data in data_list])
+            pool.close()
+            pool.join()
+        # for data in data_list:
+        #     tmp = Uploader.task_multiprocess(data.pk)
 
         # ====================== Normal ======================
         # for i in range(0, length):

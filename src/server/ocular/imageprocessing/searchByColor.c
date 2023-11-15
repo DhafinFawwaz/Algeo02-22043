@@ -270,10 +270,10 @@ int *getColorHistogram(int *matrix, int row, int col)
         }
     }
 
-    for (int o = 0; o < 72; o++)
-    {
-        printf("%d ", colorHistogram[o]);
-    }
+    // for (int o = 0; o < 72; o++)
+    // {
+    //     printf("%d ", colorHistogram[o]);
+    // }
 
     return colorHistogram;
 }

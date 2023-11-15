@@ -102,7 +102,9 @@ class UploadDatasetApiView(APIView):
         is_overwrite = int(request.data.get('is_overwrite'))
         if is_overwrite:
             print("Overwriting dataset")
+            start = time()
             DataSet.objects.all().delete()
+            print("Deleting all dataset took", time()-start, "seconds")
         else:
             print("Appending dataset")
 
@@ -111,7 +113,9 @@ class UploadDatasetApiView(APIView):
             image_list.pop(0)
 
         # Delete semua SearchResult
+        start = time()
         SearchResult.objects.all().delete()
+        print("Deleting all search result took", time()-start, "seconds")
 
         start = time()
         Uploader.saveImages(image_list)
