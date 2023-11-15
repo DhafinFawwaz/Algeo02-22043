@@ -1,5 +1,7 @@
 from django.http import HttpResponseBadRequest
+
 from .models import SearchRequest, SearchResult, DataSet
+from .serializers import SearchRequestSerializer, SearchResultSerializer
 from PIL import Image
 from typing import List, Tuple
 import hashlib
@@ -32,18 +34,9 @@ class Searcher:
         
         # Kalau data.hash ada di database, ambil semua image yang punya hash yang sama, returnkan
         is_hash_exist: bool = SearchRequest.objects.filter(hash=data.hash).exists()
+
         if is_hash_exist:
             return (SearchResult.objects.filter(hash=data.hash),True)
-        
-
-        # result: list[SearchResult] = []
-        # datasets = DataSet.objects.all()[:21]
-        # for dataset in datasets:
-        #     sr = SearchResult()
-        #     sr.image_url = dataset.image_request.url
-        #     sr.hash = data.hash
-        #     sr.similarity = 0.5
-        #     result.append(sr)
 
         # return (result, False)
         result: list[SearchResult] = []
@@ -91,7 +84,7 @@ class Searcher:
             # result.append(sr)
 
 
-            result.sort(key=lambda x: x.similarity)
+            result.sort(key=lambda x: x.similarity, reverse=True)
             return (result,False)
         else: # by color
             print("Start searching by color")
@@ -107,16 +100,10 @@ class Searcher:
             SearchReq_matrix = np.array(SearchReq_matrix, dtype=np.int32)
             Req_row = len(SearchReq_matrix)
             Req_col = len(SearchReq_matrix[0])
-            # ReqC = np.ctypeslib.as_ctypes(SearchReq_matrix)
-            # pointer_to_req = cast(ReqC, POINTER(POINTER(POINTER(c_int))))
             
             pointer_to_req = SearchReq_matrix.ctypes.data_as(POINTER(c_int))
-            # print("ptr")
-            # print(pointer_to_req)
 
             color_histogram_c = ImageProcessing.by_color.getColorHistogram(pointer_to_req, Req_row, Req_col)
-            # print("hist")
-            
 
             # hitung (multiprocessing) cosine similarity dari color_histogram dengan dataset.color_histogram
             # kalau > 0.6, append result beserta similaritynya
@@ -136,45 +123,6 @@ class Searcher:
                 # ImageProcessing.by_color.getColorHistogram(pointer_to_res, Res_row, Res_col)
                 similarity = ImageProcessing.cos_sim.cosineSimilarityColor(color_histogram_c, color_histogram_res_c, 72)
                 
-                if(isnan(similarity)):
-                    print(sr.image_url, end=", ")
-                    print("nan woi")
-
-                    print(sum(color_histogram_res_v2))
-                    print(color_histogram_res_v2)
-
-                    color_histogram_req = np.ctypeslib.as_array(color_histogram_c, shape=(72,))
-                    print(sum(color_histogram_req))
-                    print(color_histogram_req)
-
-                    continue
-                if(isinf(similarity)):
-                    print(sr.image_url, end=", ")
-                    print("infinity woi")
-
-                    print(sum(color_histogram_res_v2))
-                    print(color_histogram_res_v2)
-                    
-                    color_histogram_req = np.ctypeslib.as_array(color_histogram_c, shape=(72,))
-                    print(sum(color_histogram_req))
-                    print(color_histogram_req)
-
-                    continue
-
-                if(similarity > 1):
-                    print(sr.image_url, end=", ")
-                    print("kok lebih woi")
-
-                    print(sum(color_histogram_res_v2))
-                    print(color_histogram_res_v2)
-                    
-                    color_histogram_req = np.ctypeslib.as_array(color_histogram_c, shape=(72,))
-                    print(sum(color_histogram_req))
-                    print(color_histogram_req)
-
-                    continue
-                
-
                 sr.similarity = similarity
                 
                 if (sr.similarity > 0.6):
@@ -184,19 +132,6 @@ class Searcher:
             # sort result berdasarkan similarity
             result.sort(key=lambda x: x.similarity, reverse=True)
             return (result, False)
-
-        images_path = Path(settings.MEDIA_ROOT).glob('*.*')
-        for image_path in images_path:
-            img = Image.open(image_path)
-            im_matrix = np.array(img)
-            print(im_matrix[0][0])
-            print(im_matrix[0][0][2])
-        
-
-        return ([],True)
-
-        
-        
 
         # cara akses image
         # letaknya semuanya di folder media

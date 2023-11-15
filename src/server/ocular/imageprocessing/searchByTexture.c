@@ -48,7 +48,7 @@ void generateTexture(int sumElmt, double contrast, double dissimilarity, double 
     }
     entropy = -entropy;
     energy = sqrt(ASM);
-    textureComponent[0] = 0; // = contrast
+    textureComponent[0] = contrast; // = contrast
     textureComponent[1] = dissimilarity;
     textureComponent[2] = homogeneity;
     textureComponent[3] = ASM;

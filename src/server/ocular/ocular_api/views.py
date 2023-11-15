@@ -49,6 +49,8 @@ class SearchRequestApiView(APIView):
             SearchResult.objects.bulk_create(search_result_list)
 
             print("Saving search result took", time()-start, "seconds")
+
+            search_request.save()
             
             # search_request.pdf_result = Searcher.getPDFfromImageUrls(search_result_list)
             # search_request.save()
