@@ -57,7 +57,8 @@ INSTALLED_APPS = [
 
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000'
+    'http://localhost:3000', 'https://localhost:3000',
+    'https://192.168.36.17:3000', 'https://192.168.36.17:3000',
 ]
 
 CORS_ALLOW_METHODS = [
@@ -70,7 +71,6 @@ MEDIA_URL = '/media/'
 
 # Path where media is stored
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
-# PUBLIC_ROOT = os.path.join(BASE_DIR, '/')
 
 
 ROOT_URLCONF = 'ocular.urls'

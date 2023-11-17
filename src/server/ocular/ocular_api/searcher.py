@@ -53,9 +53,10 @@ class Searcher:
             Req_col = len(SearchReq_matrix[0])
             # hitung texture_component dari data.image_request
             pointer_to_req = SearchReq_matrix.ctypes.data_as(POINTER(c_int))
-            texture_component = ImageProcessing.by_texture.getTextureComponents(pointer_to_req, Req_row, Req_col)
+            texture_component_c = ImageProcessing.by_texture.getTextureComponents(pointer_to_req, Req_row, Req_col)
             # hitung (multiprocessing) cosine similarity dari texture_components dengan dataset.texture_components
             # kalau > 0.6, append result beserta similaritynya
+
             result: list[SearchResult] = []
             # datasets = DataSet.objects.all()
             for dataset in dataset_list:
@@ -68,7 +69,7 @@ class Searcher:
                 texture_component_res = dataset.texture_components
                 texture_component_res_v2 = np.array(texture_component_res, dtype=np.double)
                 texture_component_res_c = texture_component_res_v2.ctypes.data_as(POINTER(c_double))
-                sr.similarity = ImageProcessing.cos_sim.cosineSimilarity(texture_component, texture_component_res_c, 6)
+                sr.similarity = ImageProcessing.cos_sim.cosineSimilarity(texture_component_c, texture_component_res_c, 6)
                 if(sr.similarity > 0.6):
                     result.append(sr)
             

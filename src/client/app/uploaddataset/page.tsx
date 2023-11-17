@@ -127,7 +127,7 @@ export default function UploadDataset() {
 
   // #region Pagination ================================
   function changePage(newPage: number){
-    if(newPage < 0 || newPage > imageResult.srcList.length/imageResult.maxImagePerPage) return;
+    if(newPage < 0 || newPage >= imageResult.srcList.length/imageResult.maxImagePerPage) return;
     setImageResult(
       {
         srcList: imageResult.srcList,
@@ -135,7 +135,7 @@ export default function UploadDataset() {
         maxImagePerPage: imageResult.maxImagePerPage,
         page: newPage,
         pdf_url: imageResult.pdf_url,
-        processing_duration: 0
+        processing_duration: imageResult.processing_duration
       }
     )
   }
@@ -167,7 +167,7 @@ export default function UploadDataset() {
       // first, ..., 3rd last, current, last
       // first, ..., current, 2nd last, last
       const minPage: number = 0;
-      const maxPage: number = Math.floor(imageResult.srcList.length/imageResult.maxImagePerPage);
+      const maxPage: number = Math.ceil(imageResult.srcList.length/imageResult.maxImagePerPage)-1;
       buttonList.push(getPaginationButton(imageResult.page)); // current
       if(imageResult.page-1 >= minPage) buttonList.unshift(getPaginationButton(imageResult.page-1)); // left
       if(imageResult.page+1 <= maxPage) buttonList.push(getPaginationButton(imageResult.page+1)); // right

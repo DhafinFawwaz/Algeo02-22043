@@ -41,7 +41,7 @@ class SearchRequestApiView(APIView):
             return Response({
                 'data': [],
                 'pdf_url': ""
-            }, status=status.HTTP_404_NOT_FOUND)
+            }, status=status.HTTP_200_OK)
         
         if not is_hash_exist:
             print("Saving search request and results")

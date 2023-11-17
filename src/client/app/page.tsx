@@ -34,6 +34,7 @@ export default function Home() {
     isPreview: false,
     data: undefined
   });
+  const [searchType, setSearchType] = useState<number>(0);
   const [imageResult, setImageResult] = useState<ImageResult>({
     srcList: [],
     state: 0,
@@ -44,7 +45,7 @@ export default function Home() {
   });
   const [isHighlightImport, setIsHighlightImport] = useState<boolean>(false);
 
-  function onImageImported(e: any){
+  function onImageImported(e: React.ChangeEvent<HTMLInputElement>){
     if (e.target.files[0]) {
       setImageImport({
         src: URL.createObjectURL(e.target.files[0]), 
@@ -55,6 +56,7 @@ export default function Home() {
       });
     }
   }
+  const [debugMessage, setDebugMessage] = useState<string>();
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>){
     e.preventDefault();
@@ -66,18 +68,22 @@ export default function Home() {
 
     setImageResult({srcList: [], state: 1, maxImagePerPage: imageResult.maxImagePerPage, page: 0, pdf_url: "", processing_duration: 0});
 
-    const formData = new FormData(e.currentTarget);
+    const formData: FormData = new FormData();
+    formData.set("search_type", searchType.toString());
     formData.set("image", imageImport.data!);
-
     const requestOptions: RequestInit = {
       method: "POST",
       body: formData,
     };
 
     const startTime = new Date().getTime();
+    // setDebugMessage("Success");
     const res = await fetch(url+"/api/search", requestOptions)
-      .catch(e => console.log(e));
-    // wait 1 second
+      .catch((e: Error) => {
+        console.log(e);
+        // setDebugMessage(e.message);
+      });
+      // wait 1 second
     // await new Promise(r => setTimeout(r, 3000));
 
     if(!res)return;
@@ -89,15 +95,15 @@ export default function Home() {
     const data = await res.json();
     if(!data)return;
 
-
     setImageResult({
-      srcList: data.data.map((res: SearchResponse) => {return {image_url: url+res.image_url, similarity: res.similarity}}), 
+      srcList: data.data.map((res: SearchResponse) => {return {image_url: url+res.image_url, similarity: res.similarity}}),
       state: 2, 
       maxImagePerPage: imageResult.maxImagePerPage, 
       page: 0,
       pdf_url: url+data.pdf_url,
       processing_duration: (new Date().getTime() - startTime)/1000
     });
+
   }
 
   // #region Pagination ================================
@@ -110,7 +116,7 @@ export default function Home() {
         maxImagePerPage: imageResult.maxImagePerPage,
         page: newPage,
         pdf_url: imageResult.pdf_url,
-        processing_duration: 0
+        processing_duration: imageResult.processing_duration
       }
     )
   }
@@ -167,26 +173,71 @@ export default function Home() {
   // #endregion Pagination End ================================
 
 
+  // #region Auto Capture Camera ================================
+  const [isAutoCapture, setIsAutoCapture] = useState<boolean>(false);
   const loopWaitDuration = 5000;
   useEffect(() => {
+    if(!isAutoCapture) return;
     const interval = setInterval(() => {
-      console.log('Logs every minute');
-      
+      if(imageResult.state !== 1)captureCamera(); // cuma capture kalo lagi ga loading
     }, loopWaitDuration);
   
     return () => clearInterval(interval);
-  }, [])
-  const [isAutoCapture, setIsAutoCapture] = useState<boolean>(false);
-  function onEnableAutoCapture(e: any){
-    setIsAutoCapture(!isAutoCapture);
-
-    // wait for 5 seconds
-
-    // fetch to server
-    // if it returns not human face, then wait another 5 seconds again
-    // else 
-    // just start searching
+  }, [isAutoCapture])
+  useEffect(() => {
+    if(isAutoCapture){
+      const e: any = new Event('submit');
+      onSubmit(e);
+    }
+  }, [imageImport])
+  function getCurrentDateString(): string{
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = date.getMonth()+1; // +1 because month start from 0
+    const day = date.getDate();
+    const hour = date.getHours();
+    const min = date.getMinutes();
+    const sec = date.getSeconds();
+    return `${day}-${month}-${year} ${hour}-${min}-${sec}`;
   }
+  function captureCamera(){
+    navigator.mediaDevices.getUserMedia({ video: true })
+    .then((stream) => {
+      const track = stream.getVideoTracks()[0];
+      const imageCapture = new ImageCapture(track);
+
+      imageCapture.takePhoto()
+        .then((blob: any) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const base64data = reader.result as string;
+            const dataFile = new File([blob], getCurrentDateString() + ".png", {type: "image/png"});
+            const yourBase64String = base64data.substring(base64data.indexOf(',') + 1);
+            const bits = yourBase64String.length * 6;
+            const bytes = bits / 8;
+            const kb = Math.ceil(bytes / 1000);
+
+            setImageImport({
+              src: base64data as string, 
+              isPreview: true, 
+              name: dataFile.name, 
+              size: dataFile.size,
+              data: dataFile
+            },);
+
+          };
+          reader.readAsDataURL(blob);
+          track.stop();
+        })
+        .catch((error: Error) => {
+          console.error('Error capturing image:', error);
+            });
+      })
+      .catch((error: Error) => {
+        console.error('Error accessing camera:', error);
+      });
+  }
+  // #endregion Auto Capture Camera End ================================
 
 
   return (
@@ -284,7 +335,7 @@ export default function Home() {
                 
                 {!imageImport.isPreview ? <div></div> :
                 <div>
-                  <div>
+                  <div className='truncate ...'>
                     Image: {imageImport.name}
                   </div>
                   <div>
@@ -297,7 +348,7 @@ export default function Home() {
 
                   <div className='flex items-center mb-1'>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input onChange={onEnableAutoCapture} type="checkbox" value="" checked={isAutoCapture} className="sr-only peer"/>
+                      <input onChange={e => {setIsAutoCapture(!isAutoCapture);}} type="checkbox" value="" checked={isAutoCapture} className="sr-only peer"/>
                       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                     </label>
                     <span className="mx-2 font-medium text-gray-900 dark:text-white">Auto Capture</span>
@@ -306,13 +357,13 @@ export default function Home() {
                   <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">Search Algorithm:</h3>
                   <ul className="grid grid-cols-2 gap-4 mb-4">
                       <li>
-                          <input type="radio" id="default-radio-0" value={0} name="search_type" className="hidden peer" required defaultChecked/>
+                          <input onClick={e => {setSearchType(0)}} type="radio" id="default-radio-0" value={0} name="search_type" className="hidden peer" required/>
                           <label htmlFor="default-radio-0" className="inline-flex items-center justify-between w-full p-2 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-blue-500 peer-checked:border-blue-600 peer-checked:text-blue-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700">                           
                               <div className="w-full font-semibold text-center">By Texture</div>
                           </label>
                       </li>
                       <li>
-                          <input type="radio" id="default-radio-1" value={1} name="search_type" className="hidden peer"/>
+                          <input onClick={e => {setSearchType(0)}} type="radio" id="default-radio-1" value={1} name="search_type" className="hidden peer"  defaultChecked/>
                           <label htmlFor="default-radio-1" className="inline-flex items-center justify-between w-full p-2 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-blue-500 peer-checked:border-blue-600 peer-checked:text-blue-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700">
                               <div className="w-full font-semibold text-center">By Color</div>
                           </label>
@@ -400,7 +451,7 @@ export default function Home() {
             }
 
 
-         
+        <div>{debugMessage}</div>
         </article>
       </div>
     </main>
