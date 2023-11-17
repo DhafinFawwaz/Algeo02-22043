@@ -26,7 +26,7 @@ class SearchRequestApiView(APIView):
         image_request_data: InMemoryUploadedFile = request.data.get('image')
         image_request_data.seek(0)
         search_type: int = request.data.get('search_type')
-
+        print(search_type)
         
         search_request: SearchRequest = SearchRequest()
         search_request.image_request = image_request_data
@@ -100,6 +100,7 @@ class UploadDatasetApiView(APIView):
         if request.query_params.get('limit'):
             limit = int(request.query_params.get('limit'))
             all_data = all_data[:limit]
+        # all_data = all_data[]
         
         start_time = time()
         list_dataset_serializer = DataSetSerializer(all_data,many=True)

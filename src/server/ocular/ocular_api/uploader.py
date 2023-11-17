@@ -23,6 +23,8 @@ from django.db import transaction
 from time import time
 
 class Uploader:
+    def result(dataset):
+        dataset.save(update_fields=['texture_components', 'color_histogram'])
 
     def task_multiprocess(pk: int):
         dataset = DataSet.objects.get(pk=pk)
@@ -44,13 +46,18 @@ class Uploader:
         texture_components = np.ctypeslib.as_array(c_texture_components_ptr, shape=(6,))
         # ImageProcessing.by_texture.free_ptr(c_texture_components_ptr)
 
+        print("START")
+        print(image.name)
         c_color_histogram_ptr = ImageProcessing.by_color.getColorHistogram(c_img_matrix, row, col)
-        color_histogram = np.ctypeslib.as_array(c_color_histogram_ptr, shape=(72,))
+        color_histogram = np.ctypeslib.as_array(c_color_histogram_ptr, shape=(1152,))
+        print("colorhist:")
+        print(color_histogram)
+        print("=============================")
         # ImageProcessing.by_color.free_ptr(c_color_histogram_ptr)
 
         dataset.texture_components = texture_components.tolist()
         dataset.color_histogram = color_histogram.tolist()
-        dataset.save(update_fields=['texture_components', 'color_histogram'])
+        # dataset.save(update_fields=['texture_components', 'color_histogram'])
         # DataSet.objects.update(pk=pk, texture_components=texture_components.tolist(), color_histogram=color_histogram.tolist())
 
         # Debug
@@ -86,12 +93,12 @@ class Uploader:
             DataSet.objects.bulk_create(data_list)
         print("Bulk create took", time()-start, "seconds")
 
-        with Pool(cpu_count) as pool:
-            pool.map_async(Uploader.task_multiprocess, [data.pk for data in data_list])
-            pool.close()
-            pool.join()
-        # for data in data_list:
-        #     tmp = Uploader.task_multiprocess(data.pk)
+        # with Pool(cpu_count) as pool:
+        #     pool.map_async(Uploader.task_multiprocess, [data.pk for data in data_list], callback=Uploader.result)
+        #     pool.close()
+        #     pool.join()
+        for data in data_list:
+            tmp = Uploader.task_multiprocess(data.pk)
 
         # ====================== Normal ======================
         # for i in range(0, length):

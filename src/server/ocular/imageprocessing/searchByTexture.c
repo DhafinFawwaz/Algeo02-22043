@@ -28,16 +28,19 @@ void toGLCM(int *fromPicture, int height, int width)
     }
 }
 
-void generateTexture(int sumElmt , double contrast, double dissimilarity, double homogeneity, double ASM, double entropy, double energy, double* textureComponent, int pictHeight, int pictWidth){
+void generateTexture(int sumElmt, double contrast, double dissimilarity, double homogeneity, double ASM, double entropy, double energy, double *textureComponent, int pictHeight, int pictWidth)
+{
     int i, j;
-    for(i = 0 ; i < GLCM_SIZE ; i++){
-        for(j = 0; j < GLCM_SIZE ; j++){
-            //denorm
-            Res [i][j] /= 2*sumElmt;
-            //calculating component
-            contrast += Res[i][j] * (i-j) * (i-j);
-            dissimilarity += Res[i][j] * abs(i-j);
-            homogeneity += Res[i][j] / (1 + (i-j)*(i-j));
+    for (i = 0; i < GLCM_SIZE; i++)
+    {
+        for (j = 0; j < GLCM_SIZE; j++)
+        {
+            // denorm
+            Res[i][j] /= 2 * sumElmt;
+            // calculating component
+            contrast += Res[i][j] * (i - j) * (i - j);
+            dissimilarity += Res[i][j] * abs(i - j);
+            homogeneity += Res[i][j] / (1 + (i - j) * (i - j));
             ASM += Res[i][j] * Res[i][j];
             if (Res[i][j] != 0)
                 entropy += Res[i][j] * log(Res[i][j]);
@@ -60,8 +63,8 @@ double *getTextureComponents(int *fromPicture, int pictHeight, int pictWidth)
 {
     double *textureComponents;
     textureComponents = (double *)malloc(sizeof(double) * COSINE_SIMILARITY_VECTOR_SIZE);
-    toGLCM(fromPicture,pictHeight,pictWidth);
-    generateTexture(pictHeight*(pictWidth-1),0,0,0,0,0,0,textureComponents,pictHeight,pictWidth);
+    toGLCM(fromPicture, pictHeight, pictWidth);
+    generateTexture(pictHeight * (pictWidth - 1), 0, 0, 0, 0, 0, 0, textureComponents, pictHeight, pictWidth);
     return textureComponents;
 }
 

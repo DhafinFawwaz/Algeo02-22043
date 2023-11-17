@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 #define HSV_HIST_SIZE 72
+#define HSV_HIST_SIZE_FULL 1152
 
 double normalizedRGB(double n)
 {
@@ -235,17 +237,20 @@ int getVValue(int R, int G, int B)
 int *getColorHistogram(int *matrix, int row, int col)
 {
     int *colorHistogram;
-    colorHistogram = (int *)malloc(sizeof(int) * HSV_HIST_SIZE + 5);
+    colorHistogram = (int *)malloc(sizeof(int) * HSV_HIST_SIZE_FULL + 5);
     if (colorHistogram == NULL)
     {
         printf("gagal maloc\n");
     }
-    for (int i = 0; i < HSV_HIST_SIZE; i++)
+    // printf("b1\n");
+    // memset(colorHistogram, 0, sizeof(int) * HSV_HIST_SIZE_FULL);
+    // printf("%d\n", sizeof(colorHistogram));
+    for (int i = 0; i < HSV_HIST_SIZE_FULL; i++)
     {
         colorHistogram[i] = 0;
-        // printf("%d ", colorHistogram[i]);
     }
     // printf("helo hehe\n");
+    // printf("b2\n");
 
     int R, G, B;
     // int AAAA = 0;
@@ -253,14 +258,25 @@ int *getColorHistogram(int *matrix, int row, int col)
 
     int foridx = 0;
 
+    double rowcvrt = (double)row;
+    double colcvrt = (double)col;
+    int rowidx = floor(rowcvrt / 4);
+    int colidx = floor(colcvrt / 4);
+    // printf("b3\n");
+
+    // printf("%d %d %lf %lf %d %d\n", row, col, rowcvrt, colcvrt, rowidx, colidx);
+    int m = 0;
+    int n = 0;
+
     for (int m = 0; m < 4; m++)
     {
         for (int n = 0; n < 4; n++)
         {
-            for (int k = floor(row) * m; k < floor(row) * (m + 1); k++)
+            for (int k = rowidx * m; k < rowidx * (m + 1); k++)
             {
-                for (int j = floor(col) * n; j < floor(col) * (n + 1); j++)
+                for (int j = colidx * n; j < colidx * (n + 1); j++)
                 {
+                    // printf("here1\n");
                     R = matrix[k * col * 3 + j * 3];
                     G = matrix[k * col * 3 + j * 3 + 1];
                     B = matrix[k * col * 3 + j * 3 + 2];
@@ -278,17 +294,29 @@ int *getColorHistogram(int *matrix, int row, int col)
                     int idx = foridx * HSV_HIST_SIZE + H * 9 + S * 3 + V;
                     // printf("%d---\n", idx);
                     // printf("pass3\n");
+                    // printf("%didx222\n", idx);
+                    if (idx > 1151)
+                    {
+                        printf("kelebihan\n");
+                    }
                     colorHistogram[idx] += 1;
+                    if (colorHistogram[idx] < 0 || colorHistogram[idx] > 100000)
+                    {
+                        printf("salah\n");
+                    }
                     // printf("pass4\n");
                     // AAAA++;
-                    // printf("%d\n", AAAA);
+                    // printf("%didx\n", idx);
+                    // printf("%daaa\n", AAAA);
+                    // printf("%d %d %d %d %d\n", m, n, k, j, foridx);
                     // break;
                 }
-                foridx++;
             }
+            foridx++;
         }
-        m = 0;
     }
+    // printf("%d %d %lf %lf %d %d %d\n", row, col, rowcvrt, colcvrt, rowidx, colidx, foridx);
+    return colorHistogram;
 }
 
 void free_ptr(int *arr)

@@ -357,13 +357,13 @@ export default function Home() {
                   <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">Search Algorithm:</h3>
                   <ul className="grid grid-cols-2 gap-4 mb-4">
                       <li>
-                          <input onClick={e => {setSearchType(0)}} type="radio" id="default-radio-0" value={0} name="search_type" className="hidden peer" required/>
+                          <input onClick={e => {setSearchType(0)}} type="radio" id="default-radio-0" value={0} name="search_type" className="hidden peer" required defaultChecked/>
                           <label htmlFor="default-radio-0" className="inline-flex items-center justify-between w-full p-2 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-blue-500 peer-checked:border-blue-600 peer-checked:text-blue-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700">                           
                               <div className="w-full font-semibold text-center">By Texture</div>
                           </label>
                       </li>
                       <li>
-                          <input onClick={e => {setSearchType(0)}} type="radio" id="default-radio-1" value={1} name="search_type" className="hidden peer"  defaultChecked/>
+                          <input onClick={e => {setSearchType(1)}} type="radio" id="default-radio-1" value={1} name="search_type" className="hidden peer"/>
                           <label htmlFor="default-radio-1" className="inline-flex items-center justify-between w-full p-2 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-blue-500 peer-checked:border-blue-600 peer-checked:text-blue-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700">
                               <div className="w-full font-semibold text-center">By Color</div>
                           </label>

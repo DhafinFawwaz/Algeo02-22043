@@ -1,3 +1,6 @@
+import django
+django.setup()
+
 from django.http import HttpResponseBadRequest
 
 from .models import SearchRequest, SearchResult, DataSet
@@ -17,6 +20,8 @@ import tempfile
 from django.core.files.base import ContentFile
 from .apps import ImageProcessing
 from ctypes import cast, POINTER, c_int, c_double
+from multiprocessing import Pool
+import os
 
 from math import isnan, isinf
 
@@ -28,6 +33,28 @@ class Searcher:
         print("Hash generated:", sha256_hash)
         return sha256_hash
     
+    def searchByColorMultiprocess(dataset, data, color_histogram_c):
+        print("haha")
+        return 9999
+        sr = SearchResult()
+        sr.image_url = dataset.image_request.url
+        sr.hash = data.hash
+
+        color_histogram_res = dataset.color_histogram
+        color_histogram_res_v2 = np.array(color_histogram_res, dtype=np.int32)
+        color_histogram_res_c = color_histogram_res_v2.ctypes.data_as(POINTER(c_int))
+        similarity = ImageProcessing.cos_sim.cosineSimilarityColor(color_histogram_c, color_histogram_res_c, 72)
+        print(similarity)
+        
+        sr.similarity = similarity
+
+        return sr
+
+    def searchByColorResult(sr):
+        if (sr.similarity > 0.6):
+            Searcher.result.append(sr)
+
+    result: list[SearchResult] = []
 
     # list isinya imagenya, bool nentuin apakah hashnya ada di database atau tidak
     def getSearchResult(data: SearchRequest) -> Tuple[List[SearchResult],bool]:
@@ -58,10 +85,8 @@ class Searcher:
             # kalau > 0.6, append result beserta similaritynya
 
             result: list[SearchResult] = []
-            # datasets = DataSet.objects.all()
+
             for dataset in dataset_list:
-                # print(settings.MEDIA_ROOT)
-                # print(settings.PUBLIC_ROOT)
                 sr = SearchResult()
                 sr.image_url = dataset.image_request.url
                 sr.hash = data.hash
@@ -72,17 +97,6 @@ class Searcher:
                 sr.similarity = ImageProcessing.cos_sim.cosineSimilarity(texture_component_c, texture_component_res_c, 6)
                 if(sr.similarity > 0.6):
                     result.append(sr)
-            
-            # sort result berdasarkan similarity
-            
-            # contoh
-            # sr = SearchResult()
-            # sr.hash = data.hash
-            # sr.image_url = dataset_list[0].image_request.url 
-            # ini image_url cek dulu aku lupa
-            # harusnya itu misalnya sr.image_url = /media/dataset/0.jpg
-
-            # result.append(sr)
 
 
             result.sort(key=lambda x: x.similarity, reverse=True)
@@ -93,7 +107,6 @@ class Searcher:
             # ambil semua di database
             dataset_list: list[DataSet] = DataSet.objects.all()
             
-            # variables needed
 
             # hitung color_histogram dari data.image_request
             SearchReq_matrix = Image.open(data.image_request)
@@ -108,54 +121,40 @@ class Searcher:
 
             # hitung (multiprocessing) cosine similarity dari color_histogram dengan dataset.color_histogram
             # kalau > 0.6, append result beserta similaritynya
-            result: list[SearchResult] = []
-            # datasets = DataSet.objects.all()
-            for dataset in dataset_list:
 
-                sr = SearchResult()
-                sr.image_url = dataset.image_request.url
-                sr.hash = data.hash
+            Searcher.result = []
+            with Pool(os.cpu_count()) as pool:
+                # for dataset in dataset_list:
+                # pool.map_async(Searcher.searchByColorMultiprocess, [(dataset, data, color_histogram_c) for dataset in dataset_list], callback = Searcher.searchByColorResult)
+                #     pool.apply_async(Searcher.searchByColorMultiprocess, (dataset, data, color_histogram_c), callback = Searcher.searchByColorResult)
+                # results = [pool.apply_async(Searcher.searchByColorMultiprocess, (dataset_list[i], data, color_histogram_c), callback=Searcher.searchByColorResult) for i in range(len(dataset_list))]
+                results = [pool.apply_async(Searcher.searchByColorMultiprocess, (5,), callback=Searcher.searchByColorResult) for i in range(10)]
+                pool.close()
+                pool.join()
 
-                # ResC = np.ctypeslib.as_ctypes(SearchRes_matrix)
-                # pointer_to_res = cast(ResC, POINTER(POINTER(POINTER(c_int))))
-                color_histogram_res = dataset.color_histogram
-                color_histogram_res_v2 = np.array(color_histogram_res, dtype=np.int32)
-                color_histogram_res_c = color_histogram_res_v2.ctypes.data_as(POINTER(c_int))
-                # ImageProcessing.by_color.getColorHistogram(pointer_to_res, Res_row, Res_col)
-                similarity = ImageProcessing.cos_sim.cosineSimilarityColor(color_histogram_c, color_histogram_res_c, 72)
+
+            
+            # for dataset in dataset_list:
+
+            #     sr = SearchResult()
+            #     sr.image_url = dataset.image_request.url
+            #     sr.hash = data.hash
+
+            #     color_histogram_res = dataset.color_histogram
+            #     color_histogram_res_v2 = np.array(color_histogram_res, dtype=np.int32)
+            #     color_histogram_res_c = color_histogram_res_v2.ctypes.data_as(POINTER(c_int))
+            #     similarity = ImageProcessing.cos_sim.cosineSimilarityColor(color_histogram_c, color_histogram_res_c, 72)
+            #     print(similarity)
                 
-                sr.similarity = similarity
+            #     sr.similarity = similarity
                 
-                if (sr.similarity > 0.6):
-                    result.append(sr)
+            #     if (sr.similarity > 0.6):
+            #         result.append(sr)
 
             
             # sort result berdasarkan similarity
             result.sort(key=lambda x: x.similarity, reverse=True)
             return (result, False)
-
-        # cara akses image
-        # letaknya semuanya di folder media
-        # ini ngebuka dataset yang mau dibandingin
-        # img = Image.open(settings.MEDIA_ROOT+"No.jpg")
-        # img.show()
-        
-        # for test
-        # ini ngebuka data yg direquest clients
-        # img = Image.open(data.image_request)
-        # img.show()
-        # return
-
-        # print("Showing image:", data.image_request.name)
-
-        # result: list[SearchResult] = []
-        # for i in range(15):
-        #     sr = SearchResult()
-        #     sr.hash = data.hash
-        #     sr.image_url = "/media/download.jpeg"
-        #     result.append(sr)
-        
-        # return (result, is_hash_exist)
 
     def getPDFfromImageUrls(search_result_list: list[SearchResult]):
 
