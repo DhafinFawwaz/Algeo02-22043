@@ -12,7 +12,6 @@ django-cors-headers==4.3.0
 django-rest-framework==0.1.0
 djangorestframework==3.14.0
 filelock==3.13.1
-frozenlist==1.4.0
 idna==3.4
 img2pdf==0.5.0
 jsonschema==4.19.2
