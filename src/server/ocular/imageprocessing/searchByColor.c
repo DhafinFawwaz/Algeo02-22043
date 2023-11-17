@@ -171,7 +171,6 @@ int getVValue(int R, int G, int B)
     double b = (double)B;
     double tempVal = getCmax(normalizedRGB(r), normalizedRGB(g), normalizedRGB(b));
 
-
     if (tempVal >= 0 && tempVal < 0.2)
     {
         return 0;
@@ -251,41 +250,45 @@ int *getColorHistogram(int *matrix, int row, int col)
     int R, G, B;
     // int AAAA = 0;
     // HSVtoHistArray(colorHistogram, row, col, matrix);
-    for (int k = 0; k < row; k++)
+
+    int foridx = 0;
+
+    for (int m = 0; m < 4; m++)
     {
-        for (int j = 0; j < col; j++)
+        for (int n = 0; n < 4; n++)
         {
-            R = matrix[k *col* 3 + j * 3];
-            G = matrix[k *col* 3 + j * 3 + 1];
-            B = matrix[k *col* 3 + j * 3 + 2];
-            // printf("%d %d %d\n", R, G, B);
-            // printf("pass\n");
-            // printf("helo haha\n");
-            // printf("helo hahe\n");
-            // printf("pass1\n");
-            int H, S, V;
-            H = getHValue(R, G, B);
-            S = getSValue(R, G, B);
-            V = getVValue(R, G, B);
-            // printf("%d %d %d\n", H, S, V);
-            // printf("pass2\n");
-            int idx = H * 9 + S * 3 + V;
-            // printf("%d---\n", idx);
-            // printf("pass3\n");
-            colorHistogram[idx] += 1;
-            // printf("pass4\n");
-            // AAAA++;
-            // printf("%d\n", AAAA);
-            // break;
+            for (int k = floor(row) * m; k < floor(row) * (m + 1); k++)
+            {
+                for (int j = floor(col) * n; j < floor(col) * (n + 1); j++)
+                {
+                    R = matrix[k * col * 3 + j * 3];
+                    G = matrix[k * col * 3 + j * 3 + 1];
+                    B = matrix[k * col * 3 + j * 3 + 2];
+                    // printf("%d %d %d\n", R, G, B);
+                    // printf("pass\n");
+                    // printf("helo haha\n");
+                    // printf("helo hahe\n");
+                    // printf("pass1\n");
+                    int H, S, V;
+                    H = getHValue(R, G, B);
+                    S = getSValue(R, G, B);
+                    V = getVValue(R, G, B);
+                    // printf("%d %d %d\n", H, S, V);
+                    // printf("pass2\n");
+                    int idx = foridx * HSV_HIST_SIZE + H * 9 + S * 3 + V;
+                    // printf("%d---\n", idx);
+                    // printf("pass3\n");
+                    colorHistogram[idx] += 1;
+                    // printf("pass4\n");
+                    // AAAA++;
+                    // printf("%d\n", AAAA);
+                    // break;
+                }
+                foridx++;
+            }
         }
+        m = 0;
     }
-
-    // for (int o = 0; o < 72; o++)
-    // {
-    //     printf("%d ", colorHistogram[o]);
-    // }
-
-    return colorHistogram;
 }
 
 void free_ptr(int *arr)
