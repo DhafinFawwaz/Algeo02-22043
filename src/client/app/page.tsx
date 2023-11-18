@@ -31,7 +31,10 @@ export default function Home() {
   const [url, setUrl] = useState<string>("");
   useEffect(() => {
     const frontendUrl = window.location.href;
-    setUrl(frontendUrl.substring(0, frontendUrl.length-5)+"8000");
+    const changedPort = frontendUrl.substring(0, frontendUrl.length-5)+"8000";
+    const backendUrl = changedPort.substring(0, 5) === "https" ? changedPort.replace("https", "http") : changedPort;
+    
+    setUrl(backendUrl);
   }, []);
 
   const [imageImport, setImageImport] = useState<ImageImport>({
@@ -68,7 +71,10 @@ export default function Home() {
   const [debugMessage, setDebugMessage] = useState<string>();
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>){
+    const startTime = new Date().getTime();
     e.preventDefault();
+
+    // check if its folder or images
 
     if(!imageImport.isPreview){
       console.log("no image");
@@ -86,11 +92,10 @@ export default function Home() {
       body: formData,
     };
 
-    const startTime = new Date().getTime();
     const res = await fetch(url+"/api/search", requestOptions)
       .catch((e: Error) => {
         console.log(e);
-        setDebugMessage(e.name+"|\n\n"+e.message+"|\n\n"+e.cause+"|\n\n"+e.stack+"\n\n");
+        setDebugMessage("Error fetching to: "+url+" | \n\n"+e.name+" | \n\n"+e.message+" | \n\n"+e.cause+" | \n\n"+e.stack+"\n\n");
         setImageResult({srcList: [], state: 3, maxImagePerPage: imageResult.maxImagePerPage, page: 0, pdf_url: "", processing_duration: 0, hash: ""});
       });
 
@@ -116,7 +121,7 @@ export default function Home() {
   }
 
   function getRoundedSimilarity(similarity: number): string{
-    return (Math.round(similarity*10000)/100).toString();
+    return (Math.round(similarity*100000000)/1000000).toString();
   }
   function getImageName(image_url: string): string{
     const imageNameLength = 40;
@@ -357,7 +362,7 @@ export default function Home() {
                 });
               }}
               >
-              <input onChange={onImageImported} name='image' id="dropzone-file" type="file" className="hidden"  accept="image/jpeg, image/jpg, image/png"/>
+              <input onChange={onImageImported} name='image' id="dropzone-file" type="file" className="hidden" accept="image/jpeg, image/jpg, image/png"/>
 
                 {
                 imageImport.isPreview ?

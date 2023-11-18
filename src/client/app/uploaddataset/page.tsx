@@ -2,7 +2,7 @@
 import Image from 'next/image'
 import { useState } from 'react';
 import { ImageImport, ImageResult, SearchResponse } from '../page';
-import { LoadingSkeleton } from '@/component/loadingskeleton';
+import { LoadingSkeleton, LoadingSpinner } from '@/component/loadingskeleton';
 
 interface ImageImportList{
   imageImport: ImageImport[];
@@ -19,6 +19,8 @@ export default function UploadDataset() {
   const [isHighlightImport, setIsHighlightImport] = useState<boolean>(false);
 
   const [uploadState, setUploadState] = useState<number>(0);
+
+  const [uploadDuration, setUploadDuration] = useState<number>(-1);
 
   const [imageResult, setImageResult] = useState<ImageResult>({
     srcList: [],
@@ -47,12 +49,15 @@ export default function UploadDataset() {
   }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>){
+    const startTime = new Date().getTime();
     e.preventDefault();
+
 
     if(!imageImportList.isPreview){
       console.log("no image");
       return;
     }
+    setUploadState(1);
 
     const formData = new FormData(e.currentTarget);
     formData.delete("images");
@@ -65,11 +70,10 @@ export default function UploadDataset() {
       body: formData,
     };
 
-    setUploadState(1);
     const res = await fetch(url+"/api/upload/dataset", requestOptions)
       .catch(e => console.log(e));
     // wait 1 second
-    setUploadState(2);
+    
 
     if(!res)return;
     if(res.status === 400){
@@ -79,11 +83,15 @@ export default function UploadDataset() {
 
     try{
       const data = await res.json();
+      
+      setUploadState(2);
+      setUploadDuration((new Date().getTime() - startTime)/1000); 
       if(!data)return;
     }catch(e){
       console.log(e);
+      setUploadState(2);
+      setUploadDuration((new Date().getTime() - startTime)/1000); 
     }
-
   }
 
   async function onSubmitScrapping(e: React.FormEvent<HTMLFormElement>){
@@ -249,7 +257,17 @@ export default function UploadDataset() {
                 });
               }}
               >
-              <input multiple={true} onChange={onImageImported} name='images' id="dropzone-file" type="file" className="hidden" accept="image/*"/>
+              <input 
+                multiple={true} 
+                onChange={onImageImported} 
+                name='images' 
+                id="dropzone-file" 
+                type="file" 
+                className="hidden" 
+                directory=""
+                webkitdirectory=""
+                accept="image/jpeg, image/jpg, image/png"
+              />
 
                 
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -302,12 +320,12 @@ export default function UploadDataset() {
                 </>
                 : uploadState === 2 ?
                 <>
-                  <input type="submit" value={"Done. Upload More?"} className='h-10 w-full cursor-pointer text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700'/>
+                  <input type="submit" value={`Done in ${uploadDuration}s. Upload More?`} className='h-10 w-full cursor-pointer text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700'/>
                 </>
                 :
                 <>
                   <div className='cursor-not-allowed flex justify-center h-10 gap-2 w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700'>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2"><path strokeDasharray="60" strokeDashoffset="60" strokeOpacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path strokeDasharray="15" strokeDashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg>
+                    <LoadingSpinner/>
                     <div className=''>Uploading...</div>
                   </div>
                 </>
@@ -326,14 +344,24 @@ export default function UploadDataset() {
           <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Upload dataset by web scrapping</label>
           <form onSubmit={onSubmitScrapping} className='grid sm:grid-cols-7 gap-4'>
             <input type="url" name='web_url' className="sm:col-span-5 bg-gray-50 border text-gray-900 sm:text-sm rounded-lg block p-2.5 border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="https://id.wikipedia.org/wiki/Ayam" required/>
-
-            <input disabled={imageResult.state === 1} type="submit" value={
-              imageResult.state == 0 ? "Start Scrapping"
-              : imageResult.state == 1 ? "Scrapping..."
-              : imageResult.state == 2 ? "Done. Start again?"
-              : "Error. Start again?"
-              } className={`${imageResult.state === 1 ? 'cursor-not-allowed':'cursor-pointer'} sm:col-span-2 h-10 w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700`}/>
-
+            
+            {imageResult.state !== 1 ?
+            <>
+              <input type="submit" value={
+                imageResult.state == 0 ? "Start Scrapping"
+                : imageResult.state == 2 ? "Done. Start again?"
+                : "Error. Start again?"
+                } 
+              className='cursor-pointer sm:col-span-2 h-10 w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700'/>
+            </>
+            :
+            <>
+              <div className='flex justify-center cursor-not-allowed sm:col-span-2 h-10 w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700'>
+                <LoadingSpinner/>
+                <div className='ml-2'>Scrapping...</div>
+              </div>
+            </>
+            }
           </form>
 
 
