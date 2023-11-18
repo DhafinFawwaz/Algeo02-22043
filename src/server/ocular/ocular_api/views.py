@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import permissions
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from PIL import Image, ImageDraw
 from typing import List, Tuple
 from django.conf import settings
@@ -54,12 +54,6 @@ class SearchRequestApiView(APIView):
             search_request.image_request = None
             search_request.save()
             
-            print("Saving PDF")
-            start = time()
-            # search_request.pdf_result = Searcher.getPDFfromImageUrls(search_result_list)
-            print("Saving PDF took", time()-start, "seconds")
-
-            # search_request.save()
         else:
             print("Return cached search result")
         
@@ -67,7 +61,7 @@ class SearchRequestApiView(APIView):
         serialized_data = SearchResultSerializer(search_result_list, many=True).data
         response = {
             'data': serialized_data,
-            'pdf_url': "/media/result/"+search_request.hash+".pdf"
+            'pdf_url': "/media/result/"+search_request.hash+".pdf" if is_hash_exist else ""
         }
 
         return Response(response, status=status.HTTP_201_CREATED)
@@ -164,4 +158,36 @@ class ScrapDatasetApiView(APIView):
 
     
         # delete all SearchResult
+
+class PDFApiView(APIView):
+    permission_classes = [permissions.AllowAny]
+    parser_classes = [MultiPartParser, JSONParser]
+
+    def post(self, request, *args, **kwargs):
+        
+        print("[Saving PDF]")
+        hash = request.data.get('hash')
+
+        # get all search result with hash
+        search_result_list = SearchResult.objects.all().filter(hash=hash)
+
+        start = time()
+        pdf_result = Searcher.getPDFfromImageUrls(search_result_list)
+        print(time()-start, " | Creating PDF")
+
+        start = time()
+        search_request = SearchRequest.objects.get(hash=hash)
+        search_request.pdf_result = pdf_result
+        search_request.save()
+        print(time()-start, " | Updating SearchRequest PDF File")
+
+        response = {
+            'pdf_url': "/media/result/"+hash+".pdf"
+        }
+        return Response(response, status=status.HTTP_201_CREATED)
+
+    
+        # delete all SearchResult
+
+
 

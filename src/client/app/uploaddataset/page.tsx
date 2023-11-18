@@ -3,7 +3,6 @@ import Image from 'next/image'
 import { useState } from 'react';
 import { ImageImport, ImageResult, SearchResponse } from '../page';
 import { LoadingSkeleton } from '@/component/loadingskeleton';
-import Link from 'next/link';
 
 interface ImageImportList{
   imageImport: ImageImport[];
@@ -27,7 +26,8 @@ export default function UploadDataset() {
     maxImagePerPage: 6,
     page: 0,
     pdf_url: "",
-    processing_duration: 0
+    processing_duration: 0,
+    hash: "",
   });
 
 
@@ -88,7 +88,7 @@ export default function UploadDataset() {
 
   async function onSubmitScrapping(e: React.FormEvent<HTMLFormElement>){
     e.preventDefault();
-    setImageResult({srcList: [], state: 1, maxImagePerPage: imageResult.maxImagePerPage, page: 0, pdf_url: "", processing_duration: 0});
+    setImageResult({srcList: [], state: 1, maxImagePerPage: imageResult.maxImagePerPage, page: 0, pdf_url: "", processing_duration: 0, hash: ""});
 
     const formData = new FormData(e.currentTarget);
 
@@ -108,7 +108,7 @@ export default function UploadDataset() {
     }
     if(res.status === 500){
       console.log("internal server error");
-      setImageResult({srcList: [], state: 3, maxImagePerPage: imageResult.maxImagePerPage, page: 0, pdf_url: "", processing_duration: 0});
+      setImageResult({srcList: [], state: 3, maxImagePerPage: imageResult.maxImagePerPage, page: 0, pdf_url: "", processing_duration: 0, hash:  ""});
       return; // internal server error
     }
 
@@ -121,7 +121,8 @@ export default function UploadDataset() {
       maxImagePerPage: imageResult.maxImagePerPage, 
       page: 0,
       pdf_url: url+data.pdf_url,
-      processing_duration: (new Date().getTime() - startTime)/1000
+      processing_duration: (new Date().getTime() - startTime)/1000, 
+      hash:  ""
     });
   }
 
@@ -135,7 +136,8 @@ export default function UploadDataset() {
         maxImagePerPage: imageResult.maxImagePerPage,
         page: newPage,
         pdf_url: imageResult.pdf_url,
-        processing_duration: imageResult.processing_duration
+        processing_duration: imageResult.processing_duration,
+        hash:  ""
       }
     )
   }
@@ -195,7 +197,7 @@ export default function UploadDataset() {
     <main className="pb-16 lg:pt-16 lg:pb-24">
       <div className='flex justify-between px-4 mx-auto max-w-screen-xl'>
         <article className='mx-auto w-full max-w-2xl format format-sm sm:format-base lg:format-lg format-blue dark:format-invert'>
-          <h1 className='font-bold text-3xl text-center mb-8'>Upload Dataset</h1>
+          <h1 className='text-slate-950 dark:text-white font-bold text-3xl text-center mb-8'>Upload Dataset</h1>
           {/* Form */}
           
           <form onSubmit={onSubmit}>

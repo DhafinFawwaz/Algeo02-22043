@@ -2,7 +2,7 @@
 import Image from 'next/image'
 import { useEffect, useState } from 'react';
 import { LoadingSkeleton } from '../component/loadingskeleton';
-import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 export interface ImageImport{
   src: string,
@@ -13,7 +13,7 @@ export interface ImageImport{
 }
 export interface SearchResponse{
   image_url: string,
-  similarity: number
+  similarity: number,
 }
 export interface ImageResult{
   srcList: SearchResponse[],
@@ -21,11 +21,18 @@ export interface ImageResult{
   maxImagePerPage: number,
   page: number,
   pdf_url: string,
-  processing_duration: number
+  processing_duration: number,
+  hash: string
 }
 
 export default function Home() {
-  const url = "http://127.0.0.1:8000"
+  // const url = "http://127.0.0.1:8000"
+  // const url = "http://192.168.36.17:8000/"
+  const [url, setUrl] = useState<string>("");
+  useEffect(() => {
+    const frontendUrl = window.location.href;
+    setUrl(frontendUrl.substring(0, frontendUrl.length-5)+"8000");
+  }, []);
 
   const [imageImport, setImageImport] = useState<ImageImport>({
     src: "",
@@ -41,7 +48,8 @@ export default function Home() {
     maxImagePerPage: 6,
     page: 0,
     pdf_url: "",
-    processing_duration: 0
+    processing_duration: 0,
+    hash: ""
   });
   const [isHighlightImport, setIsHighlightImport] = useState<boolean>(false);
 
@@ -67,25 +75,24 @@ export default function Home() {
       return;
     }
 
-    setImageResult({srcList: [], state: 1, maxImagePerPage: imageResult.maxImagePerPage, page: 0, pdf_url: "", processing_duration: 0});
+    setImageResult({srcList: [], state: 1, maxImagePerPage: imageResult.maxImagePerPage, page: 0, pdf_url: "", processing_duration: 0, hash: ""});
 
     const formData: FormData = new FormData();
     formData.set("search_type", searchType.toString());
     formData.set("image", imageImport.data!);
+    
     const requestOptions: RequestInit = {
       method: "POST",
       body: formData,
     };
 
     const startTime = new Date().getTime();
-    // setDebugMessage("Success");
     const res = await fetch(url+"/api/search", requestOptions)
       .catch((e: Error) => {
         console.log(e);
-        // setDebugMessage(e.message);
+        setDebugMessage(e.name+"|\n\n"+e.message+"|\n\n"+e.cause+"|\n\n"+e.stack+"\n\n");
+        setImageResult({srcList: [], state: 3, maxImagePerPage: imageResult.maxImagePerPage, page: 0, pdf_url: "", processing_duration: 0, hash: ""});
       });
-      // wait 1 second
-    // await new Promise(r => setTimeout(r, 3000));
 
     if(!res)return;
     if(res.status === 400){
@@ -93,18 +100,32 @@ export default function Home() {
       return; // bad request
     }
 
-    const data = await res.json();
-    if(!data)return;
+    const jsonres = await res.json();
+    if(!jsonres)return;
 
     setImageResult({
-      srcList: data.data.map((res: SearchResponse) => {return {image_url: url+res.image_url, similarity: res.similarity}}),
+      srcList: jsonres.data.map((res: SearchResponse) => {return {image_url: url+res.image_url, similarity: res.similarity}}),
       state: 2, 
       maxImagePerPage: imageResult.maxImagePerPage, 
       page: 0,
-      pdf_url: url+data.pdf_url,
-      processing_duration: (new Date().getTime() - startTime)/1000
+      pdf_url: (!jsonres.pdf_url) ? "" : url+jsonres.pdf_url,
+      processing_duration: (new Date().getTime() - startTime)/1000,
+      hash: jsonres.data.length === 0 ? "" : jsonres.data[0].hash
     });
 
+  }
+
+  function getRoundedSimilarity(similarity: number): string{
+    return (Math.round(similarity*10000)/100).toString();
+  }
+  function getImageName(image_url: string): string{
+    const imageNameLength = 40;
+    const splitted = image_url.split("/");
+    const imageName = splitted[splitted.length-1];
+    if(imageName.length > imageNameLength){
+      return imageName.substring(0, imageNameLength-3)+"...";
+    }
+    return imageName;
   }
 
   // #region Pagination ================================
@@ -117,7 +138,8 @@ export default function Home() {
         maxImagePerPage: imageResult.maxImagePerPage,
         page: newPage,
         pdf_url: imageResult.pdf_url,
-        processing_duration: imageResult.processing_duration
+        processing_duration: imageResult.processing_duration,
+        hash: imageResult.hash
       }
     )
   }
@@ -213,10 +235,6 @@ export default function Home() {
           reader.onloadend = () => {
             const base64data = reader.result as string;
             const dataFile = new File([blob], getCurrentDateString() + ".png", {type: "image/png"});
-            const yourBase64String = base64data.substring(base64data.indexOf(',') + 1);
-            const bits = yourBase64String.length * 6;
-            const bytes = bits / 8;
-            const kb = Math.ceil(bytes / 1000);
 
             setImageImport({
               src: base64data as string, 
@@ -240,13 +258,52 @@ export default function Home() {
   }
   // #endregion Auto Capture Camera End ================================
 
+  const [isLoadingPDF, setIsLoadingPDF] = useState<boolean>(false);
+  async function onDownloadPDF(e: React.MouseEvent<HTMLButtonElement>){
+    e.preventDefault();
+    
+    if(imageResult.pdf_url){
+      window.open(imageResult.pdf_url, '_blank');
+      return;
+    }
+
+    const requestOptions: RequestInit = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({hash: imageResult.hash}),
+    };
+    setIsLoadingPDF(true);
+    const res = await fetch(url+"/api/pdf", requestOptions)
+      .catch((e: Error) => {
+        console.log(e);
+      });
+    setIsLoadingPDF(false);
+
+    if(!res)return;
+
+    const jsonres = await res.json();
+    if(!jsonres)return;
+    if(!jsonres.pdf_url)return;
+
+    setImageResult({
+      srcList: imageResult.srcList,
+      state: imageResult.state,
+      maxImagePerPage: imageResult.maxImagePerPage,
+      page: imageResult.page,
+      pdf_url: url+jsonres.pdf_url, // new
+      processing_duration: imageResult.processing_duration,
+      hash: imageResult.hash
+    });
+
+    window.open(url+jsonres.pdf_url, '_blank');
+  }
 
   return (
     <main className="pb-16 lg:pt-16 lg:pb-24">
       <div className='flex justify-between px-4 mx-auto max-w-screen-xl'>
         <article className='mx-auto w-full max-w-2xl format format-sm sm:format-base lg:format-lg format-blue dark:format-invert'>
           
-          <h1 className='font-bold text-3xl text-center mb-8'>Reverse Image Search</h1>
+          <h1 className='font-bold text-slate-950 dark:text-white text-3xl text-center mb-8'>Reverse Image Search</h1>
           {/* Form */}
           
           <form onSubmit={onSubmit}>
@@ -280,6 +337,16 @@ export default function Home() {
                 e.preventDefault();
                 e.stopPropagation();
                 setIsHighlightImport(false);
+                
+                // check if file is image and is either png, jpg, or jpeg
+                if(e.dataTransfer.files.length !== 1) return;
+                if(!e.dataTransfer.files[0].type.includes("image")) return;
+                if(!e.dataTransfer.files[0].type.includes("png") && !e.dataTransfer.files[0].type.includes("jpg") && !e.dataTransfer.files[0].type.includes("jpeg")) return;
+                let i = 0;
+                for(i = 0; i < e.dataTransfer.files.length; i++){
+                  if(!e.dataTransfer.files[i].type.includes("image")) return;
+                  if(!e.dataTransfer.files[i].type.includes("png") && !e.dataTransfer.files[i].type.includes("jpg") && !e.dataTransfer.files[i].type.includes("jpeg")) return;
+                }
 
                 setImageImport({
                   src: URL.createObjectURL(e.dataTransfer.files[0]), 
@@ -290,7 +357,7 @@ export default function Home() {
                 });
               }}
               >
-              <input onChange={onImageImported} name='image' id="dropzone-file" type="file" className="hidden"  accept="image/*"/>
+              <input onChange={onImageImported} name='image' id="dropzone-file" type="file" className="hidden"  accept="image/jpeg, image/jpg, image/png"/>
 
                 {
                 imageImport.isPreview ?
@@ -337,7 +404,7 @@ export default function Home() {
                 {!imageImport.isPreview ? <div></div> :
                 <div>
                   <div className='truncate ...'>
-                    Image: {imageImport.name}
+                    Image: {getImageName(imageImport.name)}
                   </div>
                   <div>
                     Size: {imageImport.size/1000} KB
@@ -350,12 +417,12 @@ export default function Home() {
                   <div className='flex items-center mb-1'>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input onChange={e => {setIsAutoCapture(!isAutoCapture);}} type="checkbox" value="" checked={isAutoCapture} className="sr-only peer"/>
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                      <div className="bg-white w-11 h-6 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-slate-200 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                     </label>
                     <span className="mx-2 font-medium text-gray-900 dark:text-white">Auto Capture</span>
                   </div>
                   
-                  <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">Search Algorithm:</h3>
+                  <h3 className="mb-2 font-medium text-gray-900 dark:text-white">Search Algorithm:</h3>
                   <ul className="grid grid-cols-2 gap-4 mb-4">
                       <li>
                           <input onClick={e => {setSearchType(0)}} type="radio" id="default-radio-0" value={0} name="search_type" className="hidden peer" required defaultChecked/>
@@ -376,7 +443,7 @@ export default function Home() {
                     : imageResult.state == 1 ? "Searching..."
                     : imageResult.state == 2 ? "Done. Search again?"
                     : "Error. Start again?"
-                    } className={`${imageResult.state === 1 ? 'cursor-not-allowed':'cursor-pointer'} w-full cursor-pointer text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700`}></input>
+                    } className={`${imageResult.state === 1 ? 'cursor-not-allowed':'cursor-pointer'} w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700`}></input>
                 </div>
 
 
@@ -414,8 +481,10 @@ export default function Home() {
                         return  <a href={image.image_url} target='_blank' key={i} className='w-full h-36 bg-slate-700 rounded-lg relative cursor-pointer group'>
                                   <img className='object-cover w-full h-full rounded-lg absolute' src={image.image_url}/>
                                   <div className='opacity-0 group-hover:opacity-50 duration-150 bg-black h-full w-full z-30 rounded-lg absolute flex flex-col-reverse justify-between'>
-                                    <div className='truncate ... z-50 px-2 pb-0.5'>{image.image_url}</div>
-                                    <div className='z-50 px-2 pt-1 text-end'>{`${image.similarity*100}%`}</div>
+                                    <div className='truncate ... z-10 px-2 pb-0.5'>{image.image_url}</div>
+                                  </div>
+                                  <div className='absolute h-1/3 w-full rounded-lg opacity-80 z-50 flex justify-end bg-gradient-to-b from-black to-transparent'>
+                                    <div className='z-10 px-2 pt-1 text-end'>{`${getRoundedSimilarity(image.similarity)}%`}</div>
                                   </div>
                                 </a>  
                       }
@@ -443,15 +512,15 @@ export default function Home() {
               </>
             }
 
-            {imageResult.state === 2 ? 
-              <Link target='_blank' href={imageResult.pdf_url} type="submit" className='text-center mt-4 w-full cursor-pointer text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700'>
-                Download Search Result as PDF
-              </Link>
+            {imageResult.state === 2 && imageResult.hash ? 
+              <button disabled={isLoadingPDF} onClick={onDownloadPDF} className={`${isLoadingPDF ? "cursor-not-allowed" : "cursor-pointer"} text-center mt-4 w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700`}>
+                {isLoadingPDF ? "Processing PDF File..." : "Download Search Result as PDF"}
+              </button>
               :
               <></>
             }
 
-
+        <br />
         <div>{debugMessage}</div>
         </article>
       </div>

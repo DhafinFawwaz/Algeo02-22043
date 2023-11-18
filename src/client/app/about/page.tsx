@@ -53,7 +53,6 @@ export default function Home() {
             gambar akan dikalkulasikan menggunakan cosine similarity.
           </p>
           <br/>
-          
           <h2 className='w-4/6 mx-auto flex justify-center items-center box-decoration-slice bg-gradient-to-r from-purple-700 to-sky-300 text-white text-4xl font-bold rounded-lg mb-4'>How To Use</h2>
           <p className='text-xl'>Pencarian gambar relevan dengan upload gambar</p>
           <ul className="marker:text-sky-400 list-disc pl-3 mb-2">

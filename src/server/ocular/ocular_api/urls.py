@@ -4,6 +4,7 @@ from .views import (
     SearchResultApiView,
     UploadDatasetApiView,
     ScrapDatasetApiView,
+    PDFApiView,
 )
 
 urlpatterns = [
@@ -11,4 +12,5 @@ urlpatterns = [
     path('cache', SearchResultApiView.as_view()),
     path('upload/dataset', UploadDatasetApiView.as_view()),
     path('upload/scrap', ScrapDatasetApiView.as_view()),
+    path('pdf', PDFApiView.as_view()),
 ]
