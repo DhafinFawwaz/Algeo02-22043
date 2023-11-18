@@ -19,11 +19,11 @@ export default function RootLayout({
 
   return (
     <html lang="en" className='dark'>
-      <body className={`${leagueSpartan.className} bg-white dark:bg-gray-900 `}>
-          <header className="p-2 not-format flex justify-between bg-slate-200 dark:bg-gray-800 border-b border-gray-700">
+      <body className={`${leagueSpartan.className} bg-slate-200 dark:bg-gray-900 `}>
+          <header className="p-2 not-format flex justify-between bg-slate-100 dark:bg-gray-800 border-b dark:border-gray-700">
             <div className='flex gap-3'>
               <img className='sm:h-10 sm:w-10 h-7 w-7 sm:translate-y-0 translate-y-1.5' width={70} alt="" src={"/icon.png"}></img>
-              <div className='font-extrabold sm:text-2xl text-1xl sm:translate-y-1.5 translate-y-3'>
+              <div className='text-slate-950 dark:text-white font-extrabold sm:text-2xl text-1xl sm:translate-y-1.5 translate-y-3'>
                 OCULAR
               </div>
             </div>
