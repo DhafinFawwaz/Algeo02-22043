@@ -68,6 +68,9 @@ CORS_ALLOW_METHODS = [
     "POST",
 ]
 
+# enable https redirect
+# SECURE_SSL_REDIRECT = True
+
 # Base url to serve media files
 MEDIA_URL = '/media/'
 
