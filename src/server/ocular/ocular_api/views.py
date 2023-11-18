@@ -50,6 +50,8 @@ class SearchRequestApiView(APIView):
 
             print("Saving search result took", time()-start, "seconds")
 
+            # dont save the image
+            search_request.image_request = None
             search_request.save()
             
             print("Saving PDF")

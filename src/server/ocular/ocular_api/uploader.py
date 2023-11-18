@@ -27,14 +27,32 @@ class Uploader:
         dataset.save(update_fields=['texture_components', 'color_histogram'])
 
     def task_multiprocess(pk: int):
+        
+        start = time()
         dataset = DataSet.objects.get(pk=pk)
-        
+        print(time()-start, "|", "Getting dataset from database")
+
         image = dataset.image_request
+
+        start = time()
         img_tmp = Image.open(image)
-        img_matrix = img_tmp.convert('RGB')
-        img_matrix = np.array(img_matrix, dtype=np.int32)
-        c_img_matrix = img_matrix.ctypes.data_as(POINTER(c_int))
         
+        
+
+        print(time()-start, "|", "Opening image")
+
+        start = time()
+        img_matrix = img_tmp.convert('RGB')
+        print(time()-start, "|", "Converting image to RGB")
+
+        start = time()
+        img_matrix = np.array(img_matrix, dtype=np.int32)
+        print(time()-start, "|", "Converting image to numpy array")
+
+        start = time()
+        c_img_matrix = img_matrix.ctypes.data_as(POINTER(c_int))
+        print(time()-start, "|", "Converting image to ctypes")
+
         row = len(img_matrix)
         col = len(img_matrix[0])
 
@@ -42,21 +60,25 @@ class Uploader:
         # start_time = time()
         # Debug End
 
+        start = time()
         c_texture_components_ptr = ImageProcessing.by_texture.getTextureComponents(c_img_matrix, row, col)
         texture_components = np.ctypeslib.as_array(c_texture_components_ptr, shape=(6,))
         # ImageProcessing.by_texture.free_ptr(c_texture_components_ptr)
+        print(time()-start, "|", "Getting texture components")
 
-        print("START")
-        print(image.name)
+        start = time()
         c_color_histogram_ptr = ImageProcessing.by_color.getColorHistogram(c_img_matrix, row, col)
         color_histogram = np.ctypeslib.as_array(c_color_histogram_ptr, shape=(1152,))
-        print("colorhist:")
-        print(color_histogram)
-        print("=============================")
         # ImageProcessing.by_color.free_ptr(c_color_histogram_ptr)
+        print(time()-start, "|", "Getting color histogram")
 
+
+        start = time()
         dataset.texture_components = texture_components.tolist()
         dataset.color_histogram = color_histogram.tolist()
+        dataset.save(update_fields=['texture_components', 'color_histogram'])
+        print(time()-start, "|", "Saving to database")
+        
         # dataset.save(update_fields=['texture_components', 'color_histogram'])
         # DataSet.objects.update(pk=pk, texture_components=texture_components.tolist(), color_histogram=color_histogram.tolist())
 

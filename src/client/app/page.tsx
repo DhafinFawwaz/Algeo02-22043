@@ -46,6 +46,7 @@ export default function Home() {
   const [isHighlightImport, setIsHighlightImport] = useState<boolean>(false);
 
   function onImageImported(e: React.ChangeEvent<HTMLInputElement>){
+    if(!e.target.files)return;
     if (e.target.files[0]) {
       setImageImport({
         src: URL.createObjectURL(e.target.files[0]), 

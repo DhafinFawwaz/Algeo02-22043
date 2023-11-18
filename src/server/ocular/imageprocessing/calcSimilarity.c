@@ -30,7 +30,7 @@ double cosineSimilarityColor(int *A, int *B, int vectorSize)
     int j = 0;
     int i = 0;
     int k;
-    printf("\n%d %d\n", A[0], B[0]);
+    // printf("\n%d %d\n", A[0], B[0]);
     for (j = 0; j < 16; j++)
     {
         dotProduct = 0.0;
@@ -48,9 +48,9 @@ double cosineSimilarityColor(int *A, int *B, int vectorSize)
         {
             c[j] = -c[j];
         }
-        printf("%lf ", c[j]);
+        // printf("%lf ", c[j]);
     }
-    printf("\n===================================\n");
+    // printf("\n===================================\n");
 
     for (i = 0; i < 16; i++)
     {
