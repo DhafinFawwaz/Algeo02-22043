@@ -13,7 +13,7 @@ export interface ImageImport{
 }
 export interface SearchResponse{
   image_url: string,
-  similarity: number
+  similarity: number,
 }
 export interface ImageResult{
   srcList: SearchResponse[],
@@ -21,7 +21,8 @@ export interface ImageResult{
   maxImagePerPage: number,
   page: number,
   pdf_url: string,
-  processing_duration: number
+  processing_duration: number,
+  hash: string
 }
 
 export default function Home() {
@@ -41,7 +42,8 @@ export default function Home() {
     maxImagePerPage: 6,
     page: 0,
     pdf_url: "",
-    processing_duration: 0
+    processing_duration: 0,
+    hash: ""
   });
   const [isHighlightImport, setIsHighlightImport] = useState<boolean>(false);
 
@@ -67,7 +69,7 @@ export default function Home() {
       return;
     }
 
-    setImageResult({srcList: [], state: 1, maxImagePerPage: imageResult.maxImagePerPage, page: 0, pdf_url: "", processing_duration: 0});
+    setImageResult({srcList: [], state: 1, maxImagePerPage: imageResult.maxImagePerPage, page: 0, pdf_url: "", processing_duration: 0, hash: ""});
 
     const formData: FormData = new FormData();
     formData.set("search_type", searchType.toString());
@@ -93,18 +95,25 @@ export default function Home() {
       return; // bad request
     }
 
-    const data = await res.json();
-    if(!data)return;
+    const jsonres = await res.json();
+    if(!jsonres)return;
 
+    console.log(jsonres);
+    
     setImageResult({
-      srcList: data.data.map((res: SearchResponse) => {return {image_url: url+res.image_url, similarity: res.similarity}}),
+      srcList: jsonres.data.map((res: SearchResponse) => {return {image_url: url+res.image_url, similarity: res.similarity}}),
       state: 2, 
       maxImagePerPage: imageResult.maxImagePerPage, 
       page: 0,
-      pdf_url: url+data.pdf_url,
-      processing_duration: (new Date().getTime() - startTime)/1000
+      pdf_url: (!jsonres.pdf_url) ? "" : url+jsonres.pdf_url,
+      processing_duration: (new Date().getTime() - startTime)/1000,
+      hash: jsonres.data[0].hash
     });
 
+  }
+
+  function getRoundedSimilarity(similarity: number): string{
+    return (Math.round(similarity*10000)/100).toString();
   }
 
   // #region Pagination ================================
@@ -117,7 +126,8 @@ export default function Home() {
         maxImagePerPage: imageResult.maxImagePerPage,
         page: newPage,
         pdf_url: imageResult.pdf_url,
-        processing_duration: imageResult.processing_duration
+        processing_duration: imageResult.processing_duration,
+        hash: imageResult.hash
       }
     )
   }
@@ -213,10 +223,6 @@ export default function Home() {
           reader.onloadend = () => {
             const base64data = reader.result as string;
             const dataFile = new File([blob], getCurrentDateString() + ".png", {type: "image/png"});
-            const yourBase64String = base64data.substring(base64data.indexOf(',') + 1);
-            const bits = yourBase64String.length * 6;
-            const bytes = bits / 8;
-            const kb = Math.ceil(bytes / 1000);
 
             setImageImport({
               src: base64data as string, 
@@ -240,6 +246,45 @@ export default function Home() {
   }
   // #endregion Auto Capture Camera End ================================
 
+  const [isLoadingPDF, setIsLoadingPDF] = useState<boolean>(false);
+  async function onDownloadPDF(e: React.MouseEvent<HTMLButtonElement>){
+    e.preventDefault();
+    
+    if(imageResult.pdf_url){
+      window.open(imageResult.pdf_url, '_blank');
+      return;
+    }
+
+    const requestOptions: RequestInit = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({hash: imageResult.hash}),
+    };
+    setIsLoadingPDF(true);
+    const res = await fetch(url+"/api/pdf", requestOptions)
+      .catch((e: Error) => {
+        console.log(e);
+      });
+    setIsLoadingPDF(false);
+
+    if(!res)return;
+
+    const jsonres = await res.json();
+    if(!jsonres)return;
+    if(!jsonres.pdf_url)return;
+
+    setImageResult({
+      srcList: imageResult.srcList,
+      state: imageResult.state,
+      maxImagePerPage: imageResult.maxImagePerPage,
+      page: imageResult.page,
+      pdf_url: url+jsonres.pdf_url, // new
+      processing_duration: imageResult.processing_duration,
+      hash: imageResult.hash
+    });
+
+    window.open(url+jsonres.pdf_url, '_blank');
+  }
 
   return (
     <main className="pb-16 lg:pt-16 lg:pb-24">
@@ -376,7 +421,7 @@ export default function Home() {
                     : imageResult.state == 1 ? "Searching..."
                     : imageResult.state == 2 ? "Done. Search again?"
                     : "Error. Start again?"
-                    } className={`${imageResult.state === 1 ? 'cursor-not-allowed':'cursor-pointer'} w-full cursor-pointer text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700`}></input>
+                    } className={`${imageResult.state === 1 ? 'cursor-not-allowed':'cursor-pointer'} w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700`}></input>
                 </div>
 
 
@@ -414,8 +459,10 @@ export default function Home() {
                         return  <a href={image.image_url} target='_blank' key={i} className='w-full h-36 bg-slate-700 rounded-lg relative cursor-pointer group'>
                                   <img className='object-cover w-full h-full rounded-lg absolute' src={image.image_url}/>
                                   <div className='opacity-0 group-hover:opacity-50 duration-150 bg-black h-full w-full z-30 rounded-lg absolute flex flex-col-reverse justify-between'>
-                                    <div className='truncate ... z-50 px-2 pb-0.5'>{image.image_url}</div>
-                                    <div className='z-50 px-2 pt-1 text-end'>{`${image.similarity*100}%`}</div>
+                                    <div className='truncate ... z-10 px-2 pb-0.5'>{image.image_url}</div>
+                                  </div>
+                                  <div className='absolute h-1/3 w-full rounded-lg opacity-80 z-50 flex justify-end bg-gradient-to-b from-black to-transparent'>
+                                    <div className='z-10 px-2 pt-1 text-end'>{`${getRoundedSimilarity(image.similarity)}%`}</div>
                                   </div>
                                 </a>  
                       }
@@ -444,9 +491,9 @@ export default function Home() {
             }
 
             {imageResult.state === 2 ? 
-              <Link target='_blank' href={imageResult.pdf_url} type="submit" className='text-center mt-4 w-full cursor-pointer text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700'>
-                Download Search Result as PDF
-              </Link>
+              <button disabled={isLoadingPDF} onClick={onDownloadPDF} className={`${isLoadingPDF ? "cursor-not-allowed" : "cursor-pointer"} text-center mt-4 w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700`}>
+                {isLoadingPDF ? "Processing PDF File..." : "Download Search Result as PDF"}
+              </button>
               :
               <></>
             }

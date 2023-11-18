@@ -72,8 +72,8 @@ class Searcher:
         # Kalau data.hash ada di database, ambil semua image yang punya hash yang sama, returnkan
         is_hash_exist: bool = SearchRequest.objects.filter(hash=data.hash).exists()
 
-        # if is_hash_exist:
-        #     return (SearchResult.objects.filter(hash=data.hash),True)
+        if is_hash_exist:
+            return (SearchResult.objects.filter(hash=data.hash),True)
 
         # return (result, False)
         result: list[SearchResult] = []
@@ -215,7 +215,6 @@ class Searcher:
             temp_files.append(temp_file.name)
             img.save(temp_file.name, format="PNG")
 
-        # Convert images to PDF
         pdf_bytes = img2pdf.convert(temp_files)
         pdf_content = ContentFile(pdf_bytes, name=search_result_list[0].hash+".pdf")
 
