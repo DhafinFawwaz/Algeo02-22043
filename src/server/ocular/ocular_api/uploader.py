@@ -21,37 +21,43 @@ import urllib3
 from datetime import datetime
 from django.db import transaction
 from time import time
+import cv2
+from io import BytesIO
+from django.conf import settings
 
 class Uploader:
-    def result(dataset):
-        dataset.save(update_fields=['texture_components', 'color_histogram'])
-
-    def task_multiprocess(pk: int):
         
-        start = time()
-        dataset = DataSet.objects.get(pk=pk)
-        print(time()-start, "|", "Getting dataset from database")
+
+    def bulk_created_task_multiprocess(dataset: DataSet):
+        
+        # start = time()
+        # dataset = DataSet.objects.get(pk=pk)
+        # print(time()-start, "|", "Getting dataset from database")
 
         image = dataset.image_request
 
-        start = time()
+        # start = time()
         img_tmp = Image.open(image)
-        
-        
 
-        print(time()-start, "|", "Opening image")
+        # img_matrix = cv2.imdecode(np.frombuffer(image.read(), dtype=np.uint8), cv2.IMREAD_COLOR)
+        # if img_matrix.shape[2] == 4:  # if has alpha
+        #     img_matrix = cv2.cvtColor(image, cv2.COLOR_BGRA2RGB)
+        # elif img_matrix.shape[2] == 1:  # if 1 channel (grayscale)
+        #     img_matrix = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+        
+        # print(time()-start, "|", "Opening image")
 
-        start = time()
+        # start = time()
         img_matrix = img_tmp.convert('RGB')
-        print(time()-start, "|", "Converting image to RGB")
+        # print(time()-start, "|", "Converting image to RGB")
 
-        start = time()
+        # start = time()
         img_matrix = np.array(img_matrix, dtype=np.int32)
-        print(time()-start, "|", "Converting image to numpy array")
+        # print(time()-start, "|", "Converting image to numpy array")
 
-        start = time()
+        # start = time()
         c_img_matrix = img_matrix.ctypes.data_as(POINTER(c_int))
-        print(time()-start, "|", "Converting image to ctypes")
+        # print(time()-start, "|", "Converting image to ctypes")
 
         row = len(img_matrix)
         col = len(img_matrix[0])
@@ -60,71 +66,143 @@ class Uploader:
         # start_time = time()
         # Debug End
 
-        start = time()
+        # start = time()
         c_texture_components_ptr = ImageProcessing.by_texture.getTextureComponents(c_img_matrix, row, col)
         texture_components = np.ctypeslib.as_array(c_texture_components_ptr, shape=(6,))
         # ImageProcessing.by_texture.free_ptr(c_texture_components_ptr)
-        print(time()-start, "|", "Getting texture components")
+        # print(time()-start, "|", "Getting texture components")
 
-        start = time()
+        # start = time()
         c_color_histogram_ptr = ImageProcessing.by_color.getColorHistogram(c_img_matrix, row, col)
         color_histogram = np.ctypeslib.as_array(c_color_histogram_ptr, shape=(1152,))
         # ImageProcessing.by_color.free_ptr(c_color_histogram_ptr)
-        print(time()-start, "|", "Getting color histogram")
+        # print(time()-start, "|", "Getting color histogram")
 
 
-        start = time()
+        # start = time()
         dataset.texture_components = texture_components.tolist()
         dataset.color_histogram = color_histogram.tolist()
         dataset.save(update_fields=['texture_components', 'color_histogram'])
-        print(time()-start, "|", "Saving to database")
-        
-        # dataset.save(update_fields=['texture_components', 'color_histogram'])
-        # DataSet.objects.update(pk=pk, texture_components=texture_components.tolist(), color_histogram=color_histogram.tolist())
+        # print(time()-start, "|", "Saving to database")
 
-        # Debug
-        # print("Time taken for image {} is {} seconds".format(pk, time()-start_time))
-        # Debug End
+        # DataSet.objects.update(pk=pk, texture_components=texture_components.tolist(), color_histogram=color_histogram.tolist())
 
         return dataset
      
+
+    def task_multiprocess(image_file: InMemoryUploadedFile, image_name: str):
+        
+        # start = time()
+        image_byte = BytesIO(image_file)
+        # print(time()-start, "|", "Converting image to BytesIO")
+        
+        # start = time()
+        img_tmp = Image.open(image_byte)
+        # print(time()-start, "|", "Opening image")
+
+        # image_read = image_byte.read()
+        # img_matrix = cv2.imdecode(np.frombuffer(image_read, dtype=np.uint8), cv2.IMREAD_COLOR)
+        # if img_matrix.shape[2] == 4:  # Check if there's alpha channel
+        #     print("Alpha channel detected. Converting to RGB.")
+        #     img_matrix = cv2.cvtColor(image_read, cv2.COLOR_BGRA2RGB)  # Convert BGRA to RGB
+        # elif img_matrix.shape[2] == 1:
+        #     img_matrix = cv2.cvtColor(image_read, cv2.COLOR_GRAY2RGB)
+        # print(time()-start, "|", "Opening image")
+
+        # start = time()
+        img_matrix = img_tmp.convert('RGB')
+        # print(time()-start, "|", "Converting image to RGB")
+
+        # start = time()
+        img_matrix = np.array(img_matrix, dtype=np.int32)
+        # print(time()-start, "|", "Converting image to numpy array")
+
+        # start = time()
+        c_img_matrix = img_matrix.ctypes.data_as(POINTER(c_int))
+        # print(time()-start, "|", "Converting image to ctypes")
+
+        row = len(img_matrix)
+        col = len(img_matrix[0])
+
+
+        # start = time()
+        c_texture_components_ptr = ImageProcessing.by_texture.getTextureComponents(c_img_matrix, row, col)
+        texture_components = np.ctypeslib.as_array(c_texture_components_ptr, shape=(6,))
+        # ImageProcessing.by_texture.free_ptr(c_texture_components_ptr)
+        # print(time()-start, "|", "Getting texture components")
+
+        # start = time()
+        c_color_histogram_ptr = ImageProcessing.by_color.getColorHistogram(c_img_matrix, row, col)
+        color_histogram = np.ctypeslib.as_array(c_color_histogram_ptr, shape=(1152,))
+        # ImageProcessing.by_color.free_ptr(c_color_histogram_ptr)
+        # print(time()-start, "|", "Getting color histogram")
+
+
+        # start = time()
+        img_to_save = InMemoryUploadedFile(
+            image_byte,
+            None,
+            image_name,
+            'image/jpeg',
+            getsizeof(image_byte),
+            None
+        )
+        # print(time()-start, "|", "Converting image to InMemoryUploadedFile")
+
+        # start = time()
+        DataSet.objects.create(image_request=img_to_save, texture_components=texture_components.tolist(), color_histogram=color_histogram.tolist())
+        # print(time()-start, "|", "saving")
+
+
     def saveImages(image_list: list[InMemoryUploadedFile]):
 
         length = len(image_list)
         print("Saving {} images".format(length))
-        cpu_count = os.cpu_count()
 
-        # ====================== Multiprocessing ======================
-        # with Pool(cpu_count) as pool:
-        #     for i in range(0, length):
-        #         new_data = DataSet()
-        #         new_data.image_request = image_list[i]
-        #         new_data.save()
-        #         pool.apply_async(Uploader.task_multiprocess, (new_data.pk,))
-        #     pool.close()
-        #     pool.join()
-
-        # ====================== Multiprocessing with Bulk create ======================
-        data_list: list[DataSet] = []
-        for i in range(0, length):
-            new_data = DataSet(image_request=image_list[i])
-            data_list.append(new_data)
-        # Bulk create all DataSet objects at once
+        # region ====================== Multiprocessing ======================
         start = time()
-        with transaction.atomic():
-            DataSet.objects.bulk_create(data_list)
-        print("Bulk create took", time()-start, "seconds")
+        with Pool(os.cpu_count()) as pool:
+            multiprocess_result_list = [pool.apply_async(Uploader.task_multiprocess, 
+                                        args=(image.read(),image.name,) 
+                                        ) for image in image_list]
+            pool.close()
+            pool.join()
+        print(time()-start, "|", "Multiprocessing duration")
+        start = time()
+        for multiprocess_result in multiprocess_result_list:
+            if not multiprocess_result.successful():
+                print("Process failed with exception:", multiprocess_result.get())
+        print(time()-start, "|", "Error checking duration")
+        # endregion ====================== Multiprocessing ======================
 
-        # with Pool(cpu_count) as pool:
-        #     pool.map_async(Uploader.task_multiprocess, [data.pk for data in data_list], callback=Uploader.result)
-        #     pool.close()
-        #     pool.join()
-        for data in data_list:
-            tmp = Uploader.task_multiprocess(data.pk)
-
-        # ====================== Normal ======================
+        # region ====================== Multiprocessing with Bulk create ======================
+        # data_list: list[DataSet] = []
         # for i in range(0, length):
-        #     Uploader.task_sequencial(image_list[i])
+        #     new_data = DataSet(image_request=image_list[i])
+        #     data_list.append(new_data)
+        # # Bulk create all DataSet objects at once
+        # start = time()
+        # with transaction.atomic():
+        #     DataSet.objects.bulk_create(data_list)
+        # print(time()-start, "|", "Bulk create duration")
+
+        # start = time()
+        # with Pool(os.cpu_count()) as pool:
+        #         multiprocess_result_list = [pool.apply_async(Uploader.bulk_created_task_multiprocess, 
+        #                                     args=(data,) 
+        #                                     ) for data in data_list]
+        #         pool.close()
+        #         pool.join()
+        # print(time()-start, "|", "Multiprocessing duration")
+        # start = time()
+        # for multiprocess_result in multiprocess_result_list:
+        #     if not multiprocess_result.successful():
+        #         print("Process failed with exception:", multiprocess_result.get())
+        # print(time()-start, "|", "Error checking duration")
+        # endregion ====================== Multiprocessing with Bulk create ======================
+        
+        # for data in data_list:
+        #     tmp = Uploader.task_multiprocess(data.pk)
 
         return
     

@@ -138,46 +138,46 @@ class Searcher:
             print(time()-start, "|", "Converting requested color histogram to numpy array")
 
             # region Multiprocessing ==================================================
-            start = time()
-            with Pool(os.cpu_count()) as pool:
-                # results = pool.map_async(Searcher.searchByColorMultiprocess, [(dataset, data, color_histogram_req) for dataset in dataset_list], callback = Searcher.searchByColorResult)
-                multiprocess_result_list = [pool.apply_async(Searcher.searchByColorMultiprocess, 
-                                            args=(dataset, data.hash, color_histogram_req,) 
-                                            ) for dataset in dataset_list]
-                pool.close()
-                pool.join()
-            print(time()-start, "|", "Multiprocessing duration")
+            # start = time()
+            # with Pool(os.cpu_count()) as pool:
+            #     # results = pool.map_async(Searcher.searchByColorMultiprocess, [(dataset, data, color_histogram_req) for dataset in dataset_list], callback = Searcher.searchByColorResult)
+            #     multiprocess_result_list = [pool.apply_async(Searcher.searchByColorMultiprocess, 
+            #                                 args=(dataset, data.hash, color_histogram_req,) 
+            #                                 ) for dataset in dataset_list]
+            #     pool.close()
+            #     pool.join()
+            # print(time()-start, "|", "Multiprocessing duration")
 
-            start = time()
-            for multiprocess_result in multiprocess_result_list:
-                if not multiprocess_result.successful():
-                    print("Process failed with exception:", multiprocess_result.get())
-                else:
-                    search_result: SearchResult = multiprocess_result.get()
-                    if search_result.similarity > 0.6:
-                        result.append(search_result)
-            print(time()-start, "|", "Appending result duration")
+            # start = time()
+            # for multiprocess_result in multiprocess_result_list:
+            #     if not multiprocess_result.successful():
+            #         print("Process failed with exception:", multiprocess_result.get())
+            #     else:
+            #         search_result: SearchResult = multiprocess_result.get()
+            #         if search_result.similarity > 0.6:
+            #             result.append(search_result)
+            # print(time()-start, "|", "Appending result duration")
             # endregion Multiprocessing ==================================================
 
 
             # region Linear ==================================================
-            # start = time()
-            # for dataset in dataset_list:
+            start = time()
+            for dataset in dataset_list:
 
-            #     sr = SearchResult()
-            #     sr.image_url = dataset.image_request.url
-            #     sr.hash = data.hash
+                sr = SearchResult()
+                sr.image_url = dataset.image_request.url
+                sr.hash = data.hash
 
-            #     color_histogram_res = dataset.color_histogram
-            #     color_histogram_res_v2 = np.array(color_histogram_res, dtype=np.int32)
-            #     color_histogram_res_c = color_histogram_res_v2.ctypes.data_as(POINTER(c_int))
-            #     similarity = ImageProcessing.cos_sim.cosineSimilarityColor(color_histogram_c, color_histogram_res_c, 72)
+                color_histogram_res = dataset.color_histogram
+                color_histogram_res_v2 = np.array(color_histogram_res, dtype=np.int32)
+                color_histogram_res_c = color_histogram_res_v2.ctypes.data_as(POINTER(c_int))
+                similarity = ImageProcessing.cos_sim.cosineSimilarityColor(color_histogram_c, color_histogram_res_c, 72)
                 
-            #     sr.similarity = similarity
+                sr.similarity = similarity
                 
-            #     if (sr.similarity > 0.6):
-            #         result.append(sr)
-            # print(time()-start, "|", "Linear duration")
+                if (sr.similarity > 0.6):
+                    result.append(sr)
+            print(time()-start, "|", "Linear duration")
             # endregion Linear ==================================================
             
 

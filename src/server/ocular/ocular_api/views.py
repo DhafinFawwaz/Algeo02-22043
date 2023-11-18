@@ -98,7 +98,7 @@ class UploadDatasetApiView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, *args, **kwargs):
-        all_data = DataSet.objects.all()
+        all_data = DataSet.objects.all().order_by('-id')
         if request.query_params.get('limit'):
             limit = int(request.query_params.get('limit'))
             all_data = all_data[:limit]
