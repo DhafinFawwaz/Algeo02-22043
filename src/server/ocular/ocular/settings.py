@@ -56,10 +56,12 @@ INSTALLED_APPS = [
 ]
 
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000', 'https://localhost:3000',
-    'https://192.168.36.17:3000', 'https://192.168.36.17:3000',
-]
+# CORS_ALLOWED_ORIGINS = [
+#     'http://localhost:3000', 'https://localhost:3000',
+#     'https://192.168.36.17:3000', 'https://192.168.36.17:3000',
+# ]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_METHODS = [
     "GET",
