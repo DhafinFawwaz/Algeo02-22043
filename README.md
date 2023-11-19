@@ -40,7 +40,7 @@ Pastikan npm dan python sudah terinstall.
 Install node dari https://nodejs.org/en. Install python dari https://www.python.org/downloads/
 
 ### Install Dependencies
-Gunakan Command Promt, jalankan command berikut untuk windows.
+Gunakan Command Prompt, jalankan command berikut untuk windows.
 ```bash
 git clone https://github.com/DhafinFawwaz/Algeo02-22043.git
 cd src\client
@@ -141,6 +141,7 @@ Pilih opsi upload, misalnya overwrite, yaitu untuk menghapus dataset sebelumnya.
 ![web scrap result](img/howtouse/web%20scrap%20result.png)
 
 
+<h2 id="test-case">📈 Test Case</h2>
 
 | Hasil Tes                                                                   | Deskripsi                   |
 | --------------------------------------------------------------------------  | ---------                   |
@@ -148,7 +149,7 @@ Pilih opsi upload, misalnya overwrite, yaitu untuk menghapus dataset sebelumnya.
 | ![search by texture](img/testcase/search%20by%20texture.png)                | Search by texture.   |
 | ![search auto capture by color](img/testcase/search%20auto%20capture%20by%20color.png) | Search by color dengan auto capture.   |
 | ![search by color with cache](img/testcase/search%20by%20color%20with%20cache.png) | Search by color gambar yang pernah disearch sebelumnya, sehingga akan menggunakan cache untuk mempersingkat waktu pencarian. |
-| ![search by color 2](img/testcase/search%20by%20color%202.png) ![search by color 2 with cache](img/testcase/search%20by%20color%202%20with%20cache%20last%20page.png) | Atas: Search by color. Bawah: Page akhir search by color kembali gambar yang sama, sehingga menggunakan cache. |
+| ![search by color 2](img/testcase/search%20by%20color%202.png) ![search by color 2 with cache](img/testcase/search%20by%20color%202%20wich%20cache%20last%20page.png) | Atas: Search by color. Bawah: Page akhir search by color kembali gambar yang sama, sehingga menggunakan cache. |
 | ![search by texture 2](img/testcase/search%20by%20texture%202.png) ![search by texture 2 with cache](img/testcase/search%20by%20texture%202%20with%20cache%20last%20page.png) | Atas: Search by color. Bawah: Page akhir search by color kembali gambar yang sama, sehingga menggunakan cache. |
 | ![web scrap result](img/howtouse/web%20scrap%20result.png) | Hasil dari web scrapping dari. url: https://www.endangeredwildlife.org/wildlife/mountain-chicken/  |
 | ![search by texture 3 high contrast](img/testcase/search%20by%20texture%203%20high%20contrast.png) | Search by texture dengan gambar yang memiliki kontras tinggi (gambar yang dicari tidak terdapat dalam dataset). |
@@ -170,13 +171,14 @@ Pilih opsi upload, misalnya overwrite, yaitu untuk menghapus dataset sebelumnya.
 
 <h2 id="reference">📑 Referensi</h2>
 
-- \/. (2023, June 16). YouTube. Retrieved November 19, 2023, from https://www.sciencedirect.com/science/article/pii/S0895717710005352
-
 - Anthony. (2019, August 5). Stop Misusing Toggle Switches. UX Movement. Retrieved November 19, 2023, from https://uxmovement.com/mobile/stop-misusing-toggle-switches/
 
 - Codecademy Team. (n.d.). What is a Database Index? Codecademy. Retrieved November 19, 2023, from https://www.codecademy.com/article/sql-indexes
 
 - Content-based image retrieval. (n.d.). Wikipedia. Retrieved November 19, 2023, from https://en.wikipedia.org/wiki/Content-based_image_retrieval
-Grayscale. (n.d.). Wikipedia. Retrieved November 19, 2023, from https://en.wikipedia.org/wiki/Grayscale
+
+- Content-based image retrieval using color and texture fused features. (2023, June 16). YouTube. Retrieved November 19, 2023, from https://www.sciencedirect.com/science/article/pii/S0895717710005352
+
+- Grayscale. (n.d.). Wikipedia. Retrieved November 19, 2023, from https://en.wikipedia.org/wiki/Grayscale
 
 - Web development. (n.d.). Wikipedia. Retrieved November 19, 2023, from https://en.wikipedia.org/wiki/Web_development
