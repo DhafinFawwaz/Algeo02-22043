@@ -7,50 +7,71 @@ export default function Home() {
     <main className="pb-16 lg:pt-16 lg:pb-24">
       <div className='flex justify-between px-4 mx-auto max-w-screen-xl'>
         <article className='mx-auto w-full max-w-3xl format format-sm sm:format-base lg:format-lg format-blue dark:format-invert'>
-        <span className="w-3/6 mx-auto flex justify-center items-center box-decoration-slice bg-gradient-to-r from-purple-700 to-sky-300 text-white text-4xl font-bold rounded-lg">About Us</span>
-        <br/>
-          {/* <div className='w-3/6 mx-auto'>
-            <img className='flex justify-center items-center' src="213090.jpg" alt="kami">
-            </img>
-            <br/>
-            <p className='text-xl mb-3'>
-            Daniel Mulia Putra M.
-            13522043
-            Dhafin Fawwaz Ikramullah
-            13522084
-            ra
-            </p>
-          </div> */}
-          <div className='w-4/5 mx-auto mb-7'>
-            <div className='border-2 border-slate-500 rounded-lg mb-3'>
-              <div className="grid grid-cols-3 gap-7 my-2">
-                <img className='float:left rounded-full' src="daniel.jpg"></img>
-                <p className='col-span-2 text-2xl'>Daniel Mulia Putra M.<br/>13522042</p>
+          <span className="w-3/6 mx-auto flex justify-center items-center box-decoration-slice bg-gradient-to-r from-purple-700 to-sky-300 text-white text-4xl font-bold rounded-lg">About Us</span>
+          <div className="w-full mx-auto my-12 px-4 md:px-12">
+            <div className="flex flex-wrap -mx-5 lg:-mx-4">
+              <div className=" rounded-lg my-1 px-1 w-1/3 md:w-1/2 lg:my-4 lg:px-4 lg:w-1/3">
+                  <article className="overflow-hidden rounded-lg shadow-lg">
+                      <a>
+                          <img className="block h-auto w-full" src="daniel.jpg"></img>
+                      </a>
+                      <header className="flex items-center justify-between leading-tight p-2 md:p-4">
+                          <h1 className="text-lg">
+                              <a className="no-underline text-white">
+                                  Daniel Mulia Putra M.
+                              </a>
+                          </h1>
+                          <p className="text-white text-sm">
+                            13522043
+                          </p>
+                      </header>
+                  </article>
               </div>
-            </div>
-            <div className="border-2 border-slate-500 rounded-lg mb-3">
-              <div className="grid grid-cols-3 gap-7 my-2">
-                <img className='float:left rounded-full' src="dhafin.jpg"></img>
-                <p className='col-span-2 text-2xl'>Dhafin Fawwaz Ikramullah<br/>13522084</p>
+              <div className="my-1 px-1 w-1/3 md:w-1/2 lg:my-4 lg:px-4 lg:w-1/3">
+                  <article className="overflow-hidden rounded-lg shadow-lg">
+                      <a>
+                          <img className="block h-auto w-full" src="dhafin.jpg"></img>
+                      </a>
+                      <header className="flex items-center justify-between leading-tight p-2 md:p-4">
+                          <h1 className="text-lg">
+                              <a className="no-underline text-white">
+                                  Dhafin Fawwaz Ikramullah
+                              </a>
+                          </h1>
+                          <p className="text-white text-sm">
+                            13522084
+                          </p>
+                      </header>
+                  </article>
               </div>
-            </div>
-            <div className='border-2 border-slate-500 rounded-lg mb-5'>
-              <div className="grid grid-cols-3 gap-7 my-2">
-                <img className='float:left rounded-full' src="althaf.jpg"></img>
-                <p className='col-span-2 text-2xl'>Rayendra Althaf T. N.<br/>13522107</p>
+              <div className="my-1 px-1 w-1/3 md:w-1/2 lg:my-4 lg:px-4 lg:w-1/3">
+                  <article className="overflow-hidden rounded-lg shadow-lg">
+                      <a>
+                          <img className="block h-auto w-full" src="althaf.jpg"></img>
+                      </a>
+                      <header className="flex items-center justify-between leading-tight p-2 md:p-4">
+                          <h1 className="text-lg">
+                              <a className="no-underline text-white">
+                                  Rayendra Althaf Taraka N.
+                              </a>
+                          </h1>
+                          <p className="text-white text-sm">
+                            13522107
+                          </p>
+                      </header>
+                  </article>
               </div>
             </div>
           </div>
-          {/* <div className='h-3 bg-gradient-to-r from-sky-200 to-indigo-500 rounded-lg'></div> */}
           <h1 className='w-4/6 mx-auto flex justify-center items-center box-decoration-slice bg-gradient-to-r from-purple-700 to-sky-300 text-white text-4xl font-bold rounded-lg mb-4'>Konsep Image<br/>Searching</h1>
           <p className='text-l mb-3'>
-            Pada web ini, digunakan konsep Content-Based Image Retrieval (CBIR). Dengan dasar konsep ini kami mengolah sebuah
-            citra sehingga didapatkan citra-citra yang memiliki kemiripan dengan
-            citra awal. Untuk parameter yang digunakan ada 2 pilihan, yakni warna dan tekstur. Untuk parameter
-            warna, gambar akan diubah menjadi ke bentuk HSV lalu dihitung color histogramnya.
-            Sedangkan untuk parameter tekstur, gambar akan diubah ke bentuk grayscale lalu 
-            dihitung nilai komponen-komponen teksturnya. Setelah digunakan salah satu dari parameter tersebut, kemiripan 
-            gambar akan dikalkulasikan menggunakan cosine similarity.
+              Pada web ini, digunakan konsep Content-Based Image Retrieval (CBIR). Dengan dasar konsep ini kami mengolah sebuah
+              citra sehingga didapatkan citra-citra yang memiliki kemiripan dengan
+              citra awal. Untuk parameter yang digunakan ada 2 pilihan, yakni warna dan tekstur. Untuk parameter
+              warna, gambar akan diubah menjadi ke bentuk HSV lalu dihitung color histogramnya.
+              Sedangkan untuk parameter tekstur, gambar akan diubah ke bentuk grayscale lalu 
+              dihitung nilai komponen-komponen teksturnya. Setelah digunakan salah satu dari parameter tersebut, kemiripan 
+              gambar akan dikalkulasikan menggunakan cosine similarity.
           </p>
           <br/>
           <h2 className='w-4/6 mx-auto flex justify-center items-center box-decoration-slice bg-gradient-to-r from-purple-700 to-sky-300 text-white text-4xl font-bold rounded-lg mb-4'>How To Use</h2>
