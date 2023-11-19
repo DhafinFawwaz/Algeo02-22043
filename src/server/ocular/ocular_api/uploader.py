@@ -21,7 +21,6 @@ import urllib3
 from datetime import datetime
 from django.db import transaction
 from time import time
-import cv2
 from io import BytesIO
 from django.conf import settings
 import os
