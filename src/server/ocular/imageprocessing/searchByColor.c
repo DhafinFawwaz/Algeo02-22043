@@ -295,15 +295,17 @@ int *getColorHistogram(int *matrix, int row, int col)
                     // printf("%d---\n", idx);
                     // printf("pass3\n");
                     // printf("%didx222\n", idx);
-                    if (idx > 1151)
-                    {
-                        printf("kelebihan\n");
-                    }
+                    // if (idx > 1151)
+                    // {
+                    //     printf("kelebihan\n");
+                    //     return colorHistogram;
+                    // }
                     colorHistogram[idx] += 1;
-                    if (colorHistogram[idx] < 0 || colorHistogram[idx] > 100000)
-                    {
-                        printf("salah\n");
-                    }
+                    // if (colorHistogram[idx] < 0 || colorHistogram[idx] > 100000)
+                    // {
+                    //     printf("salah\n");
+                    //     return colorHistogram;
+                    // }
                     // printf("pass4\n");
                     // AAAA++;
                     // printf("%didx\n", idx);

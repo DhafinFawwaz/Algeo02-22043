@@ -1,0 +1,56 @@
+{
+    "creators": [{
+            "name": "Daniel Mulia Putra M.",
+            "nim": "13522043",
+            "imageSrc": "daniel.jpg",
+            "clickSrc": "https://github.com/Gryphuss"
+        },{
+            "name": "Dhafin Fawwaz Ikramullah",
+            "nim": "13522084",
+            "imageSrc": "dhafin.jpg",
+            "clickSrc": "https://dhafinfawwaz.github.io/"
+        },{
+            "name": "Rayendra Althaf Taraka N.",
+            "nim": "13522107",
+            "imageSrc": "althaf.jpg",
+            "clickSrc": "https://github.com/RayNoor0"
+        }
+    ],
+    "description":{
+        "concept": "Pada web ini, digunakan konsep Content-Based Image Retrieval (CBIR). Dengan dasar konsep ini kami mengolah sebuah citra sehingga didapatkan citra-citra yang memiliki kemiripan dengan citra awal. Untuk parameter yang digunakan ada 2 pilihan, yakni warna dan tekstur. Untuk parameter warna, gambar akan diubah menjadi ke bentuk HSV lalu dihitung color histogramnya. Sedangkan untuk parameter tekstur, gambar akan diubah ke bentuk grayscale lalu dihitung nilai komponen-komponen teksturnya. Setelah digunakan salah satu dari parameter tersebut, kemiripan gambar akan dikalkulasikan menggunakan cosine similarity."
+    },
+    "howToUse":[{
+            "title": "Pencarian gambar relevan dengan upload gambar",
+            "steps": [
+                "Pilih laman searching",
+                "Upload sebuah gambar pada kolom yang disediakan",
+                "Pilih parameter pencarian",
+                "Tekan tombol \"Search Image\""
+            ]
+        },{
+            "title": "Upload dataset",
+            "steps": [
+                "Pilih laman upload",
+                "Upload folder berisi gambar pada kolom yang disediakan",
+                "Bisa juga dengan drag & drop beberapa gambar pada kolom tersebut",
+                "Pilih opsi upload",
+                "Tekan tombol \"Upload Dataset\""
+            ]
+        },{
+            "title": "Pencarian gambar relevan dengan kamera",
+            "steps": [
+                "Pilih laman searching",
+                "Nyalakan toggle \"Auto Capture\"",
+                "Pilih allow untuk akses camera",
+                "Gambar akan dimuat setiap 5 detik"
+            ]
+        },{
+            "title": "Web Scrapping",
+            "steps": [
+                "Pilih laman upload",
+                "Masukkan alamat web pada kolom yang disediakan",
+                "Tekan tombol \"Start Scrapping\""
+            ]
+        }
+    ]
+}

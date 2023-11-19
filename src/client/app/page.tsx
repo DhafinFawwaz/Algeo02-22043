@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image'
 import { useEffect, useState } from 'react';
-import { LoadingSkeleton } from '../component/loadingskeleton';
+import { LoadingSkeleton, LoadingSpinner } from '../component/loadingskeleton';
 import { useRouter } from 'next/router';
 
 export interface ImageImport{
@@ -514,8 +514,14 @@ export default function Home() {
             }
 
             {imageResult.state === 2 && imageResult.hash ? 
-              <button disabled={isLoadingPDF} onClick={onDownloadPDF} className={`${isLoadingPDF ? "cursor-not-allowed" : "cursor-pointer"} text-center mt-4 w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700`}>
-                {isLoadingPDF ? "Processing PDF File..." : "Download Search Result as PDF"}
+              <button disabled={isLoadingPDF} onClick={onDownloadPDF} className={`${isLoadingPDF ? "cursor-not-allowed" : "cursor-pointer"} flex justify-center text-center mt-4 w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700`}>
+                {isLoadingPDF ? 
+                <>
+                  <LoadingSpinner/>
+                  <div className='ml-2'>"Processing PDF File..."</div>
+                </>
+                : 
+                "Download Search Result as PDF"}
               </button>
               :
               <></>

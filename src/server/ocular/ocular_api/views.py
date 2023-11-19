@@ -82,7 +82,7 @@ class SearchRequestApiView(APIView):
         
         print("Get all search result")
         # region get all =======================
-        limit = request.query_params.get('limit')
+        limit = int(request.query_params.get('limit'))
         is_reverse = request.query_params.get('reverse') == 'true'
 
         if is_reverse:
@@ -114,7 +114,7 @@ class SearchResultApiView(APIView):
         
         print("Get all search result")
         # region get all =======================
-        limit = request.query_params.get('limit')
+        limit = int(request.query_params.get('limit'))
         is_reverse = request.query_params.get('reverse') == 'true'
 
         if is_reverse:
@@ -133,7 +133,7 @@ class UploadDatasetApiView(APIView):
 
     def get(self, request, *args, **kwargs):
         all_data = DataSet.objects.all()
-        limit = request.query_params.get('limit')
+        limit = int(request.query_params.get('limit'))
         is_reverse = request.query_params.get('reverse') == 'true'
         
         if is_reverse:
