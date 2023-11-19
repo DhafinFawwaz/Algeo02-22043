@@ -163,8 +163,7 @@ class UploadDatasetApiView(APIView):
 
         # Delete semua SearchResult
         start = time()
-        SearchResult.objects.all().delete()
-        SearchRequest.objects.all().delete()
+        Uploader.delete_all_request_result()
         print(time()-start, " | Deleting all search request & result")
 
         start = time()

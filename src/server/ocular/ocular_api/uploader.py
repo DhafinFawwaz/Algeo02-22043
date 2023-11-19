@@ -4,7 +4,7 @@ django.setup()
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from multiprocessing import Pool, Manager, Array
-from .models import DataSet
+from .models import DataSet, SearchRequest, SearchResult
 from .apps import ImageProcessing
 import numpy as np
 import os
@@ -24,6 +24,7 @@ from time import time
 import cv2
 from io import BytesIO
 from django.conf import settings
+import os
 
 class Uploader:
         
@@ -315,3 +316,13 @@ class Uploader:
             print("Failed to get all image url from", url)
             print(e)
             return ([], 500)
+
+    def delete_all_request_result():
+        SearchResult.objects.all().delete()
+        search_request = SearchRequest.objects.all()
+        for request in search_request:
+            if request.pdf_result:
+                os.remove(request.pdf_result.path)
+
+        search_request.delete()
+
