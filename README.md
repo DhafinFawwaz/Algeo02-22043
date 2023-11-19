@@ -1,7 +1,7 @@
 <h1 align="center">Tugas Besar Aljabar Linear dan Geometri 2</h1>
 
 <h2 id="description">✨ Deskripsi</h2>
-Tugas besar ini berisi .
+Tugas besar ini berisi pemanfaatan Aljabar Linear dan Geometri dalam Content-Based Image Retrieval untuk sistem temu balik gambar yang diimplementasikan dengan sebuah website.
 
 <h2 id="table-of-contents">🔍 Daftar Isi</h2>
 
