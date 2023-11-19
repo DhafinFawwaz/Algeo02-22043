@@ -158,10 +158,16 @@ class Uploader:
 
         length = len(image_list)
         print("Saving {} images".format(length))
+        cpu_count = os.cpu_count()
+
+        if length <= cpu_count: # no need to use multiprocessing
+            for image in image_list:
+                Uploader.task_multiprocess(image.read(), image.name)
+            return
 
         # region ====================== Multiprocessing ======================
         start = time()
-        with Pool(os.cpu_count()) as pool:
+        with Pool(cpu_count) as pool:
             multiprocess_result_list = [pool.apply_async(Uploader.task_multiprocess, 
                                         args=(image.read(),image.name,) 
                                         ) for image in image_list]
@@ -201,8 +207,6 @@ class Uploader:
         # print(time()-start, "|", "Error checking duration")
         # endregion ====================== Multiprocessing with Bulk create ======================
         
-        # for data in data_list:
-        #     tmp = Uploader.task_multiprocess(data.pk)
 
         return
     

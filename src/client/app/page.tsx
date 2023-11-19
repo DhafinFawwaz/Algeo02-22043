@@ -26,14 +26,10 @@ export interface ImageResult{
 }
 
 export default function Home() {
-  // const url = "http://127.0.0.1:8000"
-  // const url = "http://192.168.36.17:8000/"
   const [url, setUrl] = useState<string>("");
   useEffect(() => {
-    const frontendUrl = window.location.href;
-    const changedPort = frontendUrl.substring(0, frontendUrl.length-5)+"8000";
-    const backendUrl = changedPort.substring(0, 5) === "https" ? changedPort.replace("https", "http") : changedPort;
-    
+    const hostName = window.location.hostname;
+    const backendUrl = "http://" +hostName + ":8000";
     setUrl(backendUrl);
   }, []);
 
@@ -311,7 +307,7 @@ export default function Home() {
           <h1 className='font-bold text-slate-950 dark:text-white text-3xl text-center mb-8'>Reverse Image Search</h1>
           {/* Form */}
           
-          <form onSubmit={onSubmit}>
+          <form onSubmit={onSubmit} name='search-image' id='search-image'>
             <div className='sm:grid sm:grid-cols-2 gap-4'>
               <label htmlFor="dropzone-file" className={`
               
@@ -421,7 +417,7 @@ export default function Home() {
 
                   <div className='flex items-center mb-1'>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input onChange={e => {setIsAutoCapture(!isAutoCapture);}} type="checkbox" value="" checked={isAutoCapture} className="sr-only peer"/>
+                      <input onChange={e => {setIsAutoCapture(!isAutoCapture);}} type="checkbox" value="" checked={isAutoCapture} className="sr-only peer" name='toggle-auto-capture' id='toggle-auto-capture'/>
                       <div className="bg-white w-11 h-6 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-slate-200 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                     </label>
                     <span className="mx-2 font-medium text-gray-900 dark:text-white">Auto Capture</span>

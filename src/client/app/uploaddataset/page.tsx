@@ -1,8 +1,8 @@
 'use client';
-import Image from 'next/image'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ImageImport, ImageResult, SearchResponse } from '../page';
 import { LoadingSkeleton, LoadingSpinner } from '@/component/loadingskeleton';
+import { GetServerSideProps } from 'next';
 
 interface ImageImportList{
   imageImport: ImageImport[];
@@ -10,7 +10,12 @@ interface ImageImportList{
 }
 
 export default function UploadDataset() {
-  const url = "http://127.0.0.1:8000"
+  const [url, setUrl] = useState<string>("");
+  useEffect(() => {
+    const hostName = window.location.hostname;
+    const backendUrl = "http://" +hostName + ":8000";
+    setUrl(backendUrl);
+  }, []);
 
   const [imageImportList, setImageImportList] = useState<ImageImportList>({
     imageImport: [],
@@ -208,7 +213,7 @@ export default function UploadDataset() {
           <h1 className='text-slate-950 dark:text-white font-bold text-3xl text-center mb-8'>Upload Dataset</h1>
           {/* Form */}
           
-          <form onSubmit={onSubmit}>
+          <form onSubmit={onSubmit} name='upload-dataset' id='upload-dataset'>
             <div className='sm:grid sm:grid-cols-1 gap-4'>
               <label htmlFor="dropzone-file" className={`
               
@@ -341,8 +346,8 @@ export default function UploadDataset() {
 
           <hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"></hr>
           
-          <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Upload dataset by web scrapping</label>
-          <form onSubmit={onSubmitScrapping} className='grid sm:grid-cols-7 gap-4'>
+          <div className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Upload dataset by web scrapping</div>
+          <form name='scrap-dataset' id='scrap-dataset' onSubmit={onSubmitScrapping} className='grid sm:grid-cols-7 gap-4'>
             <input type="url" name='web_url' className="sm:col-span-5 bg-gray-50 border text-gray-900 sm:text-sm rounded-lg block p-2.5 border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="https://id.wikipedia.org/wiki/Ayam" required/>
             
             {imageResult.state !== 1 ?
@@ -427,3 +432,4 @@ export default function UploadDataset() {
     </main>
   )
 }
+
