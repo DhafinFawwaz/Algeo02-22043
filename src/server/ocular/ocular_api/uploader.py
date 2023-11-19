@@ -238,7 +238,7 @@ class Uploader:
         # Bulk create all DataSet objects at once
         DataSet.objects.bulk_create(data_list)
         with Pool(cpu_count) as pool:
-            pool.map_async(Uploader.task_multiprocess, [data.pk for data in data_list])
+            pool.map_async(Uploader.bulk_created_task_multiprocess, [data for data in data_list])
             pool.close()
             pool.join()
 
@@ -297,16 +297,21 @@ class Uploader:
                 soup = BeautifulSoup(response.data, 'html.parser')
 
                 img_tags = soup.find_all('img')
-                img_urls = [urljoin(url,img['src']) for img in img_tags if 'src' in img.attrs]
+                img_src_urls = [urljoin(url,img['src']) for img in img_tags if 'src' in img.attrs]
 
                 script_img_tags = soup.find_all('script')
-                img_matches = re.findall(r"s='data:image/jpeg;base64,(.*?)';", str(script_img_tags))
-                img_matches = [img for img in img_matches]
+                img_script_matches = re.findall(r"s='data:image/jpeg;base64,(.*?)';", str(script_img_tags))
+                img_script_matches = [img for img in img_script_matches]
 
-                return (img_urls+img_matches, response.status)
+                style_img_tags = soup.find_all('div', style=True)
+                img_style_matches = re.findall(r"background-image:url\('(.*?)'\)", str(style_img_tags))
+                img_style_matches = [img for img in img_style_matches]
+
+                return (img_src_urls+img_script_matches+img_style_matches, response.status)
             else:
                 print("Failed to get all image url from", url)
                 return ([], response.status)
         except Exception as e:
             print("Failed to get all image url from", url)
+            print(e)
             return ([], 500)

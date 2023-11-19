@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { ImageImport, ImageResult, SearchResponse } from '../page';
 import { LoadingSkeleton, LoadingSpinner } from '@/component/loadingskeleton';
-import { GetServerSideProps } from 'next';
 
 interface ImageImportList{
   imageImport: ImageImport[];

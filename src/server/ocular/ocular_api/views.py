@@ -61,7 +61,7 @@ class SearchRequestApiView(APIView):
         serialized_data = SearchResultSerializer(search_result_list, many=True).data
         response = {
             'data': serialized_data,
-            'pdf_url': "/media/result/"+search_request.hash+".pdf" if is_hash_exist else ""
+            'pdf_url': ""
         }
 
         return Response(response, status=status.HTTP_201_CREATED)
@@ -69,38 +69,80 @@ class SearchRequestApiView(APIView):
 
     # untuk debug
     def get(self, request, *args, **kwargs):
-        searchReq = SearchRequest.objects.all()
-        searchReqJson = SearchRequestSerializer(searchReq, many=True).data
-        return Response(searchReqJson, status=status.HTTP_200_OK)
+        all_data = SearchRequest.objects.all()
+
+        # region hash =======================
+        hash = request.query_params.get('hash')
+        if(hash):
+            print("Get search result by hash")
+            all_data = all_data.filter(hash=hash)
+            searchResJson = SearchRequestSerializer(all_data, many=True).data
+            return Response(searchResJson, status=status.HTTP_200_OK)
+        # endregion hash =======================
+        
+        print("Get all search result")
+        # region get all =======================
+        limit = request.query_params.get('limit')
+        is_reverse = request.query_params.get('reverse') == 'true'
+
+        if is_reverse:
+            all_data = all_data.order_by('-id')
+
+        if limit:
+            all_data = all_data[:limit]
+        # endregion get all =======================
+
+        
+        searchResJson = SearchRequestSerializer(all_data, many=True).data
+        return Response(searchResJson, status=status.HTTP_200_OK)
 
 class SearchResultApiView(APIView):
     permission_classes = [permissions.AllowAny]
 
     # untuk debug
     def get(self, request, *args, **kwargs):
+        all_data = SearchResult.objects.all()
+
+        # region hash =======================
         hash = request.query_params.get('hash')
-        if(not hash):
-            searchRes = SearchResult.objects.all()
-            searchResJson = SearchResultSerializer(searchRes, many=True).data
+        if(hash):
+            print("Get search result by hash")
+            all_data = all_data.filter(hash=hash)
+            searchResJson = SearchResultSerializer(all_data, many=True).data
             return Response(searchResJson, status=status.HTTP_200_OK)
+        # endregion hash =======================
         
-        searchRes = SearchResult.objects.filter(hash=hash)
-        searchResJson = SearchResultSerializer(searchRes, many=True).data
+        print("Get all search result")
+        # region get all =======================
+        limit = request.query_params.get('limit')
+        is_reverse = request.query_params.get('reverse') == 'true'
+
+        if is_reverse:
+            all_data = all_data.order_by('-id')
+
+        if limit:
+            all_data = all_data[:limit]
+        # endregion get all =======================
+
+        
+        searchResJson = SearchResultSerializer(all_data, many=True).data
         return Response(searchResJson, status=status.HTTP_200_OK)
 
 class UploadDatasetApiView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, *args, **kwargs):
-        all_data = DataSet.objects.all().order_by('-id')
-        if request.query_params.get('limit'):
-            limit = int(request.query_params.get('limit'))
-            all_data = all_data[:limit]
-        # all_data = all_data[]
+        all_data = DataSet.objects.all()
+        limit = request.query_params.get('limit')
+        is_reverse = request.query_params.get('reverse') == 'true'
         
-        start_time = time()
+        if is_reverse:
+            all_data = all_data.order_by('-id')
+
+        if limit:
+            all_data = all_data[:limit]
+        
         list_dataset_serializer = DataSetSerializer(all_data,many=True)
-        print("Serializing took", time()-start_time, "seconds")
         return Response(list_dataset_serializer.data, status=status.HTTP_201_CREATED)
     
     
@@ -111,7 +153,7 @@ class UploadDatasetApiView(APIView):
             print("Overwriting dataset")
             start = time()
             DataSet.objects.all().delete()
-            print("Deleting all dataset took", time()-start, "seconds")
+            print(time()-start, " | Deleting all dataset")
         else:
             print("Appending dataset")
 
@@ -122,11 +164,12 @@ class UploadDatasetApiView(APIView):
         # Delete semua SearchResult
         start = time()
         SearchResult.objects.all().delete()
-        print("Deleting all search result took", time()-start, "seconds")
+        SearchRequest.objects.all().delete()
+        print(time()-start, " | Deleting all search request & result")
 
         start = time()
         Uploader.saveImages(image_list)
-        print("Saving images took", time()-start, "seconds")
+        print(time()-start, " | Saving images")
 
         return Response("", status=status.HTTP_201_CREATED)
     
@@ -168,12 +211,23 @@ class PDFApiView(APIView):
         print("[Saving PDF]")
         hash = request.data.get('hash')
 
+        try:
+            search_request = SearchRequest.objects.get(hash=hash)
+            if search_request.pdf_result:
+                print("PDF already exist")
+                response = {
+                    'pdf_url': "/media/result/"+hash+".pdf"
+                }
+                return Response(response, status=status.HTTP_201_CREATED)
+        except:
+            pass
+
         # get all search result with hash
         search_result_list = SearchResult.objects.all().filter(hash=hash)
 
         start = time()
         pdf_result = Searcher.getPDFfromImageUrls(search_result_list)
-        print(time()-start, " | Creating PDF")
+        print(time()-start, " | Generating PDF")
 
         start = time()
         search_request = SearchRequest.objects.get(hash=hash)

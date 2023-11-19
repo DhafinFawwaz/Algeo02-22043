@@ -70,10 +70,10 @@ class Searcher:
     def getSearchResult(data: SearchRequest) -> Tuple[List[SearchResult],bool]:
         
         # Kalau data.hash ada di database, ambil semua image yang punya hash yang sama, returnkan
-        is_hash_exist: bool = SearchRequest.objects.filter(hash=data.hash).exists()
 
-        if is_hash_exist:
-            return (SearchResult.objects.filter(hash=data.hash),True)
+        if SearchRequest.objects.filter(hash=data.hash).exists():
+            search_result = SearchResult.objects.filter(hash=data.hash)
+            return (search_result,True)
 
         # return (result, False)
         result: list[SearchResult] = []
