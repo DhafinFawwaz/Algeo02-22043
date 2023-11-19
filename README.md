@@ -144,12 +144,27 @@ Pilih opsi upload, misalnya overwrite, yaitu untuk menghapus dataset sebelumnya.
 
 | Hasil Tes                                                                  | Deskripsi                   |
 | -------------------------------------------------------------------------- | ---------                   |
-| ![search by color](img/tescase/search%20by%20color.png)                    | Search by color     |
-| ![search by texture](img/tescase/search%20by%20texture.png)                | Search by texture   |
-| ![search auto capture by color](img/tescase/search%20auto%20capture%20by%20color.png) | Search by color dengan auto capture   |
-| ![search by color with cache](img/tescase/search%20by%20color%20with%20cache.png) | Search by color gambar yang pernah disearch sebelumnya, sehingga akan menggunakan cache untuk mempersingkat waktu pencarian |
-| ![search by color 2](img/tescase/search%20by%20color%202.png|width=48) ![search by color 2 with cache](img/tescase/search%20by%20color%202%20with%20cache%20last%20page.png|width=48) | Kiri: Search by color
-| ![search by texture 2](img/tescase/search%20by%20texture%202.png|width=48) ![search by texture 2 with cache](img/tescase/search%20by%20texture%202%20with%20cache%20last%20page.png|width=48) | Kiri: Search by colorKanan: Page akhir search by color kembali gambar yang sama, sehingga menggunakan cache |
+| ![search by color](img/testcase/search%20by%20color.png)                    | Search by color     |
+| ![search by texture](img/testcase/search%20by%20texture.png)                | Search by texture   |
+| ![search auto capture by color](img/testcase/search%20auto%20capture%20by%20color.png) | Search by color dengan auto capture   |
+| ![search by color with cache](img/testcase/search%20by%20color%20with%20cache.png) | Search by color gambar yang pernah disearch sebelumnya, sehingga akan menggunakan cache untuk mempersingkat waktu pencarian |
+| ![search by color 2](img/testcase/search%20by%20color%202.png) ![search by color 2 with cache](img/testcase/search%20by%20color%202%20with%20cache%20last%20page.png) | Atas: Search by color. Bawah: Page akhir search by color kembali gambar yang sama, sehingga menggunakan cache |
+| ![search by texture 2](img/testcase/search%20by%20texture%202.png) ![search by texture 2 with cache](img/testcase/search%20by%20texture%202%20with%20cache%20last%20page.png) | Atas: Search by color. Bawah: Page akhir search by color kembali gambar yang sama, sehingga menggunakan cache |
+| ![web scrap result](img/howtouse/web%20scrap%20result.png) | Hasil dari web scrapping dari. url: https://www.endangeredwildlife.org/wildlife/mountain-chicken/  |
+| ![search by texture 3 high contrast](img/testcase/search%20by%20texture%203%20high%20contrast.png) | Search by texture dengan gambar yang memiliki kontras tinggi (gambar yang dicari tidak terdapat dalam dataset) |
+| ![search by color 3 high contrast](img/testcase/search%20by%20color%203%20high%20contrast.png) | Search by Color dengan gambar yang memiliki kontras tinggi (gambar yang dicari tidak terdapat dalam dataset) |
+| ![search by texture 4](img/testcase/search%20by%20texture%204.png) | Search by texture gambar Althaf (gambar yang dicari tidak terdapat dalam dataset) |
+| ![search by color 4](img/testcase/search%20by%20color%204.png) | Search by color gambar Althaf (gambar yang dicari tidak terdapat dalam dataset) |
+| ![search by texture 5](img/testcase/search%20by%20texture%205.png) | Search by texture |
+| ![search by color 5](img/testcase/search%20by%20color%205.png) | Search by color |
+| ![search by texture 6](img/testcase/search%20by%20texture%206.png) | Search by texture |
+| ![search by color 6](img/testcase/search%20by%20color%206.png) | Search by color |
+| ![search by texture 7](img/testcase/search%20by%20texture%207.png) | Search by texture |
+| ![search by color 7](img/testcase/search%20by%20color%207.png) | Search by color |
+| ![search by texture 8](img/testcase/search%20by%20texture%208.png) | Search by texture |
+| ![search by color 8](img/testcase/search%20by%20color%208.png) | Search by color |
+
+
 
 <h2 id="reference">📑 Referensi</h2>
 
