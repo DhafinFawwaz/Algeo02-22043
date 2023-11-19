@@ -4,6 +4,7 @@
 Tugas besar ini berisi .
 
 <h2 id="table-of-contents">🔍 Daftar Isi</h2>
+
 - <a href="#description">Deskripsi</a><br/>
 - <a href="#table-of-contents">Daftar Isi</a><br/>
 - <a href="#technologies">Teknologi yang Digunakan</a><br/>
@@ -15,11 +16,13 @@ Tugas besar ini berisi .
 - <a href="#reference">Referensi</a><br/>
 
 <h2 id="technologies">🔧 Teknologi yang Digunakan</h2>
+
 - Next.js
 - Django
 - GNU Compiler Collection
 
 <h2 id="features">💫 Fitur</h2>
+
 - Pencarian berdasarkan tekstur
 - Pencarian berdasarkan color
 - Upload dataset
@@ -27,6 +30,7 @@ Tugas besar ini berisi .
 - Camera otomatis setiap 5 detik
 
 <h2 id="member">🌟 Anggota Kelompok</h2>
+
 - 13522043 - Daniel Mulia Putra Manurung<br/>
 - 13522107 - Rayendra Althaf Taraka Noor<br/>
 - 13522084 - Dhafin Fawwaz Ikramullah<br/>
@@ -141,7 +145,9 @@ Pilih opsi upload, misalnya overwrite, yaitu untuk menghapus dataset sebelumnya.
 
 <h2 id="test-case">📈 Test Case</h2>
 | Hasil Tes  | Deskripsi |
+
 | ------------- | ------------- |
+
 | ![search by color](img/tescase/search%20by%20color.png)  |  color  |
 | ![search by texture](img/tescase/search%20by%20texture.png)  |  texture  |
 
