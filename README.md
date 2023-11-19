@@ -144,13 +144,11 @@ Pilih opsi upload, misalnya overwrite, yaitu untuk menghapus dataset sebelumnya.
 
 
 <h2 id="test-case">📈 Test Case</h2>
-| Hasil Tes  | Deskripsi |
 
-| ------------- | ------------- |
-
-| ![search by color](img/tescase/search%20by%20color.png)  |  color  |
-| ![search by texture](img/tescase/search%20by%20texture.png)  |  texture  |
-
+| Hasil Tes                                                   | Deskripsi |
+| ----------------------------------------------------------- | --------- |
+| ![search by color](img/tescase/search%20by%20color.png)     | Color     |
+| ![search by texture](img/tescase/search%20by%20texture.png) | Texture   |
 
 <h2 id="reference">📑 Referensi</h2>
 
