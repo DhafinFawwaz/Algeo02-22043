@@ -145,10 +145,16 @@ Pilih opsi upload, misalnya overwrite, yaitu untuk menghapus dataset sebelumnya.
 
 <h2 id="test-case">📈 Test Case</h2>
 
-| Hasil Tes                                                   | Deskripsi |
-| ----------------------------------------------------------- | --------- |
-| ![search by color](img/tescase/search%20by%20color.png)     | Color     |
-| ![search by texture](img/tescase/search%20by%20texture.png) | Texture   |
+| Hasil Tes                                                                  | Deskripsi                   |
+| -------------------------------------------------------------------------- | ---------                   |
+| ![search by color](img/tescase/search%20by%20color.png)                    | Search by color     |
+| ![search by texture](img/tescase/search%20by%20texture.png)                | Search by texture   |
+| ![search auto capture by color](img/tescase/search%20auto%20capture%20by%20color.png) | Search by color dengan auto capture   |
+| ![search by color with cache](img/tescase/search%20by%20color%20with%20cache.png) | Search by color gambar yang pernah disearch sebelumnya, sehingga akan menggunakan cache untuk mempersingkat waktu pencarian |
+| ![search by color 2](img/tescase/search%20by%20color%202.png) ![search by color 2 with cache](img/tescase/search%20by%20color%202%20wich%20cache%20last%20page.png) | Kiri: Search by color
+| ![search by texture 2](img/tescase/search%20by%texture%202.png) ![search by texture 2 with cache](img/tescase/search%20by%texture%202%20wich%20cache%20last%20page.png) | Kiri: Search by color
+Kanan: Page akhir search by color kembali gambar yang sama, sehingga menggunakan cache
+ |
 
 <h2 id="reference">📑 Referensi</h2>
 
